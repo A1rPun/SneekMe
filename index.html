@@ -9,8 +9,10 @@
     <link href="css/main.css" rel="stylesheet" type="text/css">
 </head>
 <body>
+    <div id="output" style="position:absolute;top:0;left:0;"></div>
     <div class="center">
-        <canvas id="SneekMe" tabindex=1></canvas>
+        <canvas id="bg" tabindex=1 style="position:absolute; z-index:1"></canvas>
+        <canvas id="SneekMe" tabindex=1 style="position:absolute; z-index:1"></canvas>
     </div>
     <!-- Scripts -->
     <script type="text/javascript">
@@ -18,6 +20,7 @@
     </script>
     <script src="js/easystar.js"></script>
     <script src="js/gameState.js"></script>
+    <script src="js/level.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

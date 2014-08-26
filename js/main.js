@@ -2,26 +2,57 @@
     function rand(num) {
         return Math.floor(Math.random() * num);
     }
-    function fillArray(value, length) {
-        var arr = [];
-        while (length--) {
-            arr[length] = value;
+    function makeImages(images, callback) {
+        var result = {},
+            loads = 0,
+            keys = Object.keys(images),
+            num = keys.length;
+
+        for (var i = num; i--;) {
+            var key = keys[i],
+                img = new Image();
+            img.onload = function () {
+                if (++loads >= num) callback(result);
+            };
+            img.src = images[key];
+            result[key] = img;
         }
-        return arr;
+    }
+    function log() {
+        //console.log.apply(console, arguments);
+        var output = document.getElementById('output'),
+            txt = '';
+        for (var i = 0, l = arguments.length; i < l; i++) {
+            txt += arguments[i].toString()+' ';
+        }
+        output.innerHTML = txt + '<BR>' + output.innerHTML;
     }
 
-    var gridWidth = fillArray(0, 64);
-    var grid = fillArray(gridWidth.slice(0), 45);
-    var pathFinder = new EasyStar.js();
-    pathFinder.setAcceptableTiles([0]);
-    pathFinder.setGrid(grid);
+    var level = SneekMe.first,
+        tiles = {
+            none: 0,
+            solid: 1,
+            breakable: 2,
+            food: 50,
+            weapon: 66,
+            snake: 99
+        },
+        acceptable = [tiles.none, tiles.food],
+        pathFinder = new EasyStar.js();
+    pathFinder.setAcceptableTiles(acceptable);
+    pathFinder.setGrid(level);
     
     //Canvas stuff
-    var canvas = document.getElementById('SneekMe'),
+    var bg = document.getElementById('bg'),
+        canvas = document.getElementById('SneekMe'),
+        bgctx = bg.getContext("2d"),
         ctx = canvas.getContext("2d"),
         gameState = new SneekMe.gameState(canvas, { game: paint }),
         cw = 16,
         MAX_FOODS = 10,
+        MAX_TAILS = 5,
+        MAX_LIFES = 3,
+        BEGIN_LENGTH = 3,
         foods,// = [],
         food_loop,
         width = 1024,
@@ -29,18 +60,20 @@
         keys = [],
         players = [{
             direction: 1,
-            head: '#7555DA',
-            body: '#BADA55',
+            head: '#1E1959',
+            body: '#373276',
             left: 37,
             up: 38,
             right: 39,
             down: 40,
-            snake: []
+            snake: [],
+            //isComputer: true
         },
+        /* */
         {
             direction: 1,
-            head: '#DA5555',
-            body: '#55DADA',
+            head: '#3B1255',
+            body: '#562A72',
             left: 65,
             up: 87,
             right: 68,
@@ -48,29 +81,58 @@
             snake: [],
             //isComputer: true
         },
-        /* /
+        /* */
         {
             direction: 1,
-            score: 3,
-            head: '#55DA5E',
-            body: '#DA55D1',
+            head: '#801515',
+            body: '#AA3939',
             left: 74,
             up: 73,
             right: 76,
             down: 75,
-            snake: []
+            snake: [],
+            //isComputer: true
         },
         {
             direction: 1,
-            score: 3,
-            head: '#707070',
-            body: '#FFFFFF',
+            head: '#806815',
+            body: '#AA9139',
             left: 100,
             up: 104,
             right: 102,
             down: 101,
-            snake: []
-        }
+            snake: [],
+            //isComputer: true
+        },
+        /* */
+        {
+            direction: 1,
+            head: '#196811',
+            body: '#378B2E',
+            snake: [],
+            isComputer: true
+        },
+        {
+            direction: 1,
+            head: '#0D4C4C',
+            body: '#226666',
+            snake: [],
+            isComputer: true
+        },
+        {
+            direction: 1,
+            head: '#671140',
+            body: '#892D5F',
+            snake: [],
+            isComputer: true
+        },
+        {
+            direction: 1,
+            head: '#333333',
+            body: '#707070',
+            snake: [],
+            isComputer: true
+        },
         /* */
         ],
         bounds = {
@@ -80,151 +142,263 @@
             left: 0
         };
 
-    canvas.width = width;
-    canvas.height = height;
+    makeImages({steel: 'img/steel.jpg'}, init);
+    function init(images) {
+        canvas.width = width;
+        canvas.height = height;
+        bg.width = width;
+        bg.height = height;
+        drawBackground(images.steel);
 
-    function init() {
         foods = [];
 
         for (var i = players.length; i--;) {
-            players[i].score = 3;//3 lifes
+            players[i].score = MAX_LIFES;
+            players[i].tails = 0;
             create_snake(players[i].snake);
-        }
-        create_food();
+            create_food();
+        }        
         gameState.start('game');
-
+        /* */
         if (typeof food_loop != "undefined") clearInterval(food_loop);
         food_loop = setInterval(function () {
             if (foods.length < MAX_FOODS) {
                 create_food();
             }
         }, 5000);
+        /* */
     }
-    init();
 
     function create_snake(arr) {
-        var snakeLength = 3,
-            x = rand((width / cw) - 5),
-            y = rand((height / cw) - 2);
+        var snakeLength = BEGIN_LENGTH,
+            f,
+            pos;
         arr.length = 0;
+
+        function getPos() {
+            return {
+                x: rand((width / cw) - 3),
+                y: rand((height / cw) - 1)
+            }
+        }
+
+        while (!f) {
+            pos = getPos();
+            log('position', pos.x, pos.y, level[pos.y][pos.x]);
+            if (level[pos.y][pos.x] === tiles.none &&
+                level[pos.y][pos.x+1] === tiles.none &&
+                level[pos.y][pos.x+2] === tiles.none) {
+                f = true;
+            }
+        }
 
         for (var i = snakeLength; i--;) {
             arr.push({
-                x: x + i,
-                y: y
+                x: pos.x + i,
+                y: pos.y
             });
+            level[pos.y][pos.x + 1] = tiles.snake;
         }
     }
 
     //Lets create the food now
     function create_food() {
-        foods.push({
-            x: rand((width - cw) / cw),
-            y: rand((height - cw) / cw),
-        });
-        //This will create a cell with x/y between 0-44
-        //Because there are 45(450/10) positions accross the rows and columns
+        var f = false,
+            pos;
+        function getPos(){
+            return {
+                x: rand((width / cw)-1),
+                y: rand((height / cw) - 1)
+            }
+        }
+
+        while(!f){
+            pos = getPos();
+            log('food', pos.x, pos.y, level[pos.y][pos.x]);
+            if (level[pos.y][pos.x] === tiles.none) {
+                f = true;
+            }
+        }
+
+        foods.push(pos);
+        level[pos.y][pos.x] = tiles.food;
     }
 
-    function update() {
-        var allSnakes = [];
-        for (var i = players.length; i--;) {
-            allSnakes = allSnakes.concat(players[i].snake);
-        }        
+    function findDirection(ox, oy, nx, ny) {
 
-        for (var i = players.length; i--;) {
-            var player = players[i];
-            if (player.snake.length) {
-                var d = player.direction,
-                    nx = player.snake[0].x,
-                    ny = player.snake[0].y;
+        if (ox === nx) {
+            return oy < ny ? 2 : 0;//down : up;
+        } else {
+            return ox < nx ? 1 : 3;//right : left;
+        }
+    }
 
-                if (player.isComputer) {
-                    pathFinder.findPath(nx, ny, foods[0].x, foods[0].y, function (path) {
-                        if (path === null) {
-                            //alert("Path was not found.");
-                        } else {
-                            //alert("Path was found. The first Point is " + path[0].x + " " + path[0].y);
-                            nx = path[1].x;
-                            ny = path[1].y;
-                        }
-                    });
-                    pathFinder.calculate();
+    function moveComputer(player) {
+        var d = player.direction,
+            ox = player.snake[0].x,
+            oy = player.snake[0].y;
+        player.count++;
+
+        function findPath() {
+            log('self', ox, oy, ' target', player.tx, player.ty);
+            pathFinder.findPath(ox, oy, player.tx, player.ty, function (path) {
+                if (path === null || path.length < 2) {//alert("Path was not found.");
+                    log('OH NOES WHATTODO');
                 } else {
-                    if (keys[player.left] && d !== 1) { //right
-                        d = 3;
-                        nx--
-                    } else if (keys[player.up] && d !== 2) {//down
-                        d = 0;
-                        ny--
-                    } else if (keys[player.right] && d !== 3) {//left
-                        d = 1;
-                        nx++;
-                    } else if (keys[player.down] && d !== 0) {//up
-                        d = 2;
-                        ny++;
-                    } else {
-                        if (d == 0) ny--;
-                        else if (d == 1) nx++;
-                        else if (d == 2) ny++;
-                        else if (d == 3) nx--;
-                    }
-                    player.direction = d;
+                    player.path = path;
+                    player.count = 1;
+                    player.direction = findDirection(ox, oy, player.path[player.count].x, player.path[player.count].y);
                 }
+            });
+            pathFinder.calculate();
+        }
 
-                //Wrap around
-                if (nx < bounds.left) {
-                    nx = bounds.right;
-                } else if (nx > bounds.right) {
-                    nx = bounds.left;
-                } else if (ny < bounds.top) {
-                    ny = bounds.bottom;
-                } else if (ny > bounds.bottom) {
-                    ny = bounds.top;
-                }
+        if (!(player.tx > -1 /*&& player.ty > -1*/) || level[player.ty][player.tx] !== tiles.food) {
+            var f = foods[rand(foods.length - 1)];
+            player.tx = f.x;
+            player.ty = f.y;
+        }
 
-                //Now if the head of the snake bumps into anybody, the game will restart
-                if (~check_collision(nx, ny, allSnakes)) {
-                    player.direction = 1;
-                    player.score--;
-                    if (player.score) {
-                        create_snake(player.snake);
-                    } else {
-                        player.snake = [];
-                    }
-                    continue;
-                }
+        if (!player.path || player.count >= player.path.length) {
+            findPath();
+        } else {
+            var nx = player.path[player.count].x,
+                ny = player.path[player.count].y;
 
-                //Create a new head instead of moving the tail
-                if (~check_collision(nx, ny, foods, true)) {
-                    var tail = { x: nx, y: ny };
-                    //Create new food
-                    if (foods.length < players.length) {
-                        create_food();
-                    }
-                } else {
-                    var tail = player.snake.pop(); //pops out the last cell
-                    tail.x = nx;
-                    tail.y = ny;
-                }
-                //The snake can now eat the food.
-
-                player.snake.unshift(tail); //puts back the tail as the first cell
+            if (acceptable.indexOf(level[ny][nx]) === -1) {
+                findPath();
+            } else {
+                player.direction = findDirection(ox, oy, nx, ny);
             }
         }
     }
 
-    function drawBackground(){
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, width, height);
-        ctx.strokeStyle = "white";
-        ctx.strokeRect(0, 0, width, height);
+    function moveHuman(player) {
+        var d = player.direction;
+
+        if (keys[player.left] && d !== 1) { //right
+            d = 3;//left
+        } else if (keys[player.up] && d !== 2) {//down
+            d = 0;//up
+        } else if (keys[player.right] && d !== 3) {//left
+            d = 1;//right
+        } else if (keys[player.down] && d !== 0) {//up
+            d = 2;//down
+        }
+        player.direction = d;
     }
 
-    function drawFood() {
-        ctx.fillStyle = '#FF0000';
-        for (var i = foods.length; i--;) {
-            ctx.fillRect(foods[i].x * cw, foods[i].y * cw, cw, cw);
+    function update() {
+        for (var i = players.length; i--;) {
+            var player = players[i];
+
+            if (!player.snake.length) {
+                continue;
+            }
+
+            //Move computer & human to set correct direction
+            if (player.isComputer) {
+                moveComputer(player);
+            } else {
+                moveHuman(player);
+            }
+
+            var d = player.direction,
+                nx = player.snake[0].x,
+                ny = player.snake[0].y;
+
+            if (d == 0) ny--;
+            else if (d == 1) nx++;
+            else if (d == 2) ny++;
+            else if (d == 3) nx--;
+
+            //Wrap around
+            if (nx < bounds.left) {
+                nx = bounds.right;
+            } else if (nx > bounds.right) {
+                nx = bounds.left;
+            } else if (ny < bounds.top) {
+                ny = bounds.bottom;
+            } else if (ny > bounds.bottom) {
+                ny = bounds.top;
+            }
+
+            //Now if the head of the snake bumps into an unacceptable tile, the game will restart
+            if (acceptable.indexOf(level[ny][nx]) === -1) {
+                //GAMEOVER
+                player.direction = 1;
+                player.score--;
+
+                //TODO: Dead parts need to stay on the field
+                for (var j = player.snake.length; j--;) {
+                    var part = player.snake[j];
+                    level[part.y][part.x] = tiles.none;
+                }
+
+                if (player.score) {
+                    create_snake(player.snake);
+                } else {
+                    player.snake = [];
+                    player.tails = 0;
+                }
+                continue;
+            }
+
+            //Create a new head instead of moving the tail
+            if (level[ny][nx] === tiles.food) {
+                check_collision(nx, ny, foods, true);
+                player.tails += MAX_TAILS;                
+                //Create new food
+                if (foods.length < players.length) {
+                    create_food();
+                }
+            }
+
+            if (player.tails) {
+                var tail = { x: nx,
+                    y: ny
+                };
+                player.tails--;
+            }else{
+                var tail = player.snake.pop(); //pops out the last cell
+                level[tail.y][tail.x] = tiles.none;
+                tail.x = nx;
+                tail.y = ny;
+            }
+
+            level[tail.y][tail.x] = tiles.snake;
+            player.snake.unshift(tail); //puts back the tail as the first cell
+        }
+    }
+
+    function drawBackground(img){
+        //bgctx.fillStyle = "black";
+        //bgctx.fillRect(0, 0, width, height);
+        bgctx.drawImage(img, 0, 0, width, height);
+    }
+
+    function drawLevel() {
+        var h = level.length,
+            w = level[0].length;
+
+        for (var i = h; i--;) {
+            for (var j = w; j--;) {
+                switch (level[i][j]) {
+                    case tiles.solid:
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(j * cw, i * cw, cw, cw);
+                        break;
+                    case tiles.breakable:
+                        ctx.fillStyle = '#32CD32';
+                        ctx.fillRect(j * cw, i * cw, cw, cw);
+                        break;
+                    case tiles.food:
+                        ctx.fillStyle = '#FF0000';
+                        ctx.fillRect(j * cw, i * cw, cw, cw);
+                        break;
+                    default:
+                }
+            }
         }
     }
 
@@ -251,13 +425,23 @@
         for (var i = players.length; i--;) {
             ctx.fillText('Player' + (i + 1) + ': ' + players[i].score, 5, 15 + (10 * i));
         }
+
+        if (keys[32]) {
+            var h = level.length,
+                w = level[0].length;
+            ctx.fillStyle = '#00FF00';
+            for (var i = h; i--;) {
+                for (var j = w; j--;) {
+                    ctx.fillText(level[i][j], j * cw + 5, i * cw + 10);
+                }
+            }
+        }
     }
 
     //Lets paint the snake now
     function paint() {
-        drawBackground();
         update();
-        drawFood();
+        drawLevel();        
         drawSnake();
         drawHud();
     }
@@ -275,13 +459,15 @@
     }
 
     //Lets add the keyboard controls now
-    canvas.addEventListener('keydown', function (e) {
+    document.addEventListener('keydown', function (e) {
         e = e ? e : window.event;
         keys[e.keyCode] = true;
+        e.preventDefault();
     });
-    canvas.addEventListener('keyup', function (e) {
+    document.addEventListener('keyup', function (e) {
         e = e ? e : window.event;
         keys[e.keyCode] = false;
+        e.preventDefault();
     });
 
     var fps = 30;
