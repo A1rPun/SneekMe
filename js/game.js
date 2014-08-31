@@ -32,7 +32,7 @@
         gameState = new SneekMe.gameState(canvas, { game: paint }),
         cw = 16, mid = cw / 2,
         MAX_FOODS = 10,
-        MAX_WEAPONS = 25,
+        MAX_WEAPONS = 5,
         MAX_TAILS = 5,
         BEGIN_LENGTH = 3,
         pickip_loop,
@@ -40,7 +40,7 @@
         weapons,
         bullits,
         players = [new SneekMe.player({
-            direction: 1,
+            id: 0,
             head: '#1E1959',
             body: '#373276',
             left: 37,
@@ -48,12 +48,11 @@
             right: 39,
             down: 40,
             shoot: 16,
-            snake: [],
             //isComputer: true
         }),
         /* */
         new SneekMe.player({
-            direction: 1,
+            id: 1,
             head: '#3B1255',
             body: '#562A72',
             left: 65,
@@ -61,12 +60,11 @@
             right: 68,
             down: 83,
             shoot: 9,
-            snake: [],
-            isComputer: true
+            //isComputer: true
         }),
-        /* /
+        /* */
         new SneekMe.player({
-            direction: 1,
+            id: 2,
             head: '#801515',
             body: '#AA3939',
             left: 74,
@@ -74,11 +72,10 @@
             right: 76,
             down: 75,
             shoot: 76,
-            snake: [],
-            //isComputer: true
+            isComputer: true
         }),
         new SneekMe.player({
-            direction: 1,
+            id: 3,
             head: '#806815',
             body: '#AA9139',
             left: 100,
@@ -86,36 +83,31 @@
             right: 102,
             down: 101,
             shoot: 96,
-            snake: [],
-            //isComputer: true
+            isComputer: true
         }),
         /* /
         new SneekMe.player({
-            direction: 1,
+            id: 4,
             head: '#196811',
             body: '#378B2E',
-            snake: [],
             isComputer: true
         }),
         new SneekMe.player({
-            direction: 1,
+            id: 5,
             head: '#0D4C4C',
             body: '#226666',
-            snake: [],
             isComputer: true
         }),
         new SneekMe.player({
-            direction: 1,
+            id: 6,
             head: '#671140',
             body: '#892D5F',
-            snake: [],
             isComputer: true
         }),
         new SneekMe.player({
-            direction: 1,
+            id: 7,
             head: '#333333',
             body: '#707070',
-            snake: [],
             isComputer: true
         }),
         /* */
@@ -136,9 +128,7 @@
         bullits = [];
 
         for (var i = players.length; i--;) {
-            var player = players[i];
-            player.reset();
-            create_snake(player.snake);
+            create_snake(players[i]);
             create_food();
         }
         gameState.start('game');
@@ -152,16 +142,60 @@
             if (weapons.length < MAX_WEAPONS) {
                 create_weapon();
             }
-        }, 500);
+        }, 5000);
         /* */
     }
 
-    function create_snake(arr) {
+    function gameOver() {
+        var maxSnake = { value: 0, index: -1 },
+            maxLife = { value: 0, index: -1 },
+            foodCount = { value: 0, index: -1 },
+            shotsFired = { value: 0, index: -1 },
+            shotsHit = { value: 0, index: -1, fired: 0 };
+
+        for (var i = players.length; i--;) {
+            var player = players[i];
+
+            if (player.maxSnake > maxSnake.value) {
+                maxSnake.index = i;
+                maxSnake.value = player.maxSnake;
+            }
+
+            if (player.maxLife > maxLife.value) {
+                maxLife.index = i;
+                maxLife.value = player.maxLife;
+            }
+
+            if (player.foodCount > foodCount.value) {
+                foodCount.index = i;
+                foodCount.value = player.foodCount;
+            }
+
+            if (player.shotsFired > shotsFired.value) {
+                shotsFired.index = i;
+                shotsFired.value = player.shotsFired;
+            }
+
+            if (player.shotsHit > shotsHit.value) {
+                shotsHit.index = i;
+                shotsHit.value = player.shotsHit;
+                shotsHit.fired = player.shotsFired;
+            }
+        }
+        log('maxSnake', maxSnake.value, 'Player ' + (maxSnake.index + 1));
+        log('maxLife', (maxLife.value / 1000)+'s', 'Player ' + (maxLife.index + 1));//fix if someone never dies by registering life
+        log('foodCount', foodCount.value, 'Player ' + (foodCount.index + 1));
+        log('shotsFired', shotsFired.value, 'Player ' + (shotsFired.index + 1));
+        log('shotsHit', shotsHit.value, 'Player ' + (shotsHit.index + 1));
+        log('accuracy', (shotsHit.value / shotsHit.fired * 100) + '%', 'Player ' + (shotsHit.index + 1));
+        gameState.stop();
+    }
+
+    function create_snake(player) {
         //find longest row horizontal or vertial to spawn in
-        var snakeLength = BEGIN_LENGTH,
-            f,
+        var f,
             pos;
-        arr.length = 0;
+        player.snake.length = 0;
 
         function getPos() {
             return {
@@ -180,8 +214,8 @@
             }
         }
 
-        for (var i = snakeLength; i--;) {
-            arr.push({
+        for (var i = BEGIN_LENGTH; i--;) {
+            player.snake.push({
                 x: pos.x + i,
                 y: pos.y
             });
@@ -266,7 +300,7 @@
             player.tx = f.x;
             player.ty = f.y;
             findPath();
-        } else if (!player.path || player.count >= player.path.length) {
+        } else if (player.count >= player.path.length) {
             findPath();
         } else {
             var nx = player.path[player.count].x,
@@ -309,24 +343,19 @@
 
     function respawn(player) {
         createDeadSnake(player.snake.slice(0));
-        //GAMEOVER
-        player.direction = 1;
         player.score--;
+        player.respawn();
 
         if (player.score) {
-            create_snake(player.snake);
-        } else {
-            player.snake = [];
-            player.tails = 0;
-            player.shots = 0;
+            create_snake(player);
         }
     }
 
     function shoot(player) {
         var x = player.snake[0].x,
             y = player.snake[0].y,
-            one = { x: x, y: y, direction: 1 },
-            two = { x: x, y: y, direction: 3 };
+            one = { x: x, y: y, direction: 1, owner: player.id },
+            two = { x: x, y: y, direction: 3, owner: player.id };
         player.shots -= 1;
 
         if (player.direction === 1 || player.direction === 3) {
@@ -334,6 +363,7 @@
             two.direction = 2;
         }
         bullits.push(one, two);
+        player.shotsFired += 2;
     }
 
     function createDeadSnake(snake) {
@@ -349,12 +379,11 @@
     }
 
     function update() {
+        var playerCount = 0;
         for (var i = players.length; i--;) {
             var player = players[i];
-
-            if (!player.snake.length) {
-                continue;
-            }
+            if (!player.snake.length) continue;
+            playerCount++;
 
             //Move computer & human to set correct direction
             if (player.isComputer) {
@@ -393,6 +422,7 @@
             if (level[ny][nx] === tiles.food) {
                 check_collision(nx, ny, foods, true);
                 player.tails += MAX_TAILS;
+                player.foodCount++;
                 //Create new food
                 if (foods.length < players.length) {
                     create_food();
@@ -419,6 +449,11 @@
             player.snake.unshift(tail); //puts back the tail as the first cell
         }
 
+        if (playerCount <= 1) {
+            gameOver();
+            return;
+        }
+
         for (var i = bullits.length; i--;) {
             var bullit = bullits[i];
             level[bullit.y][bullit.x] = tiles.none;
@@ -437,11 +472,13 @@
                             index = check_collision(bullit.x, bullit.y, player.snake);
 
                         if (~index) {
+                            players[bullit.owner].shotsHit++;
                             //index hit the head or 2nd index
                             if (index < 2) {
                                 respawn(player);
                             } else {
                                 //got shot
+                                player.registerLength();
                                 var snake = player.snake;
                                 player.snake = snake.slice(0, index);
                                 createDeadSnake(snake.slice(index, snake.length));
@@ -450,6 +487,7 @@
                         }
                     }
                 } else if (tile === tiles.breakable || tile === tiles.deadSnake) {
+                    players[bullit.owner].shotsHit++;
                     level[bullit.y][bullit.x] = tiles.none;
                 }
                 bullits.splice(i, 1);
@@ -533,7 +571,7 @@
             ctx.strokeStyle = "#FF0000";
             for (var i = players.length; i--;) {
                 var p = players[i].path;
-                if (p) {
+                if (p && p.length) {
                     ctx.beginPath();
                     ctx.moveTo(p[0].x * cw + mid, p[0].y * cw + mid);
                     for (var j = players[i].count, l = p.length; j < l; j++) {

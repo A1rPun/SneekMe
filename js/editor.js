@@ -52,6 +52,7 @@
         for (var i = 0; i < h; i++) {
 
             if (i) txt += '-';
+            //txt += level[i].join(';');
             for (var j = 0; j < w; j++) {
                 if(j) txt += ';';
                 txt += level[i][j];

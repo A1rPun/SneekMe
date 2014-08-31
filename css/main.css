@@ -44,7 +44,7 @@ body {
   width: 16px;
   margin-bottom: 16px;
   display: inline-block;
-  background-color: #fff;
+  background-color: #ccc;
   margin: 0px 1px 16px 1px;
 }
 #break {
@@ -52,6 +52,6 @@ body {
   width: 16px;
   margin-bottom: 16px;
   display: inline-block;
-  background-color: #0f0;
+  background-color: #999;
   margin: 0px 1px 16px 1px;
 }
