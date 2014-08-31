@@ -12,7 +12,15 @@
     <div id="output" style="position:absolute;top:0;left:0;"></div>
     <div class="center">
         <canvas id="bg" tabindex=1 style="position:absolute; z-index:1"></canvas>
-        <canvas id="SneekMe" tabindex=1 style="position:absolute; z-index:1"></canvas>
+        <canvas id="SneekMe" tabindex=1 style="position:absolute; z-index:2"></canvas>
+        <canvas id="Editor" tabindex=1 style="position:absolute; z-index:2"></canvas>
+    </div>
+    <div id="tiles"> <!--style="display:none;"-->
+        <div id="clear"></div>Clear all<br />
+        <div id="none"></div>Empty<br />
+        <div id="solid"></div>Solid<br />
+        <div id="break"></div>Breakable<br />
+        <button id="save">Save</button>   
     </div>
     <!-- Scripts -->
     <script type="text/javascript">
@@ -20,7 +28,9 @@
     </script>
     <script src="js/easystar.js"></script>
     <script src="js/gameState.js"></script>
-    <script src="js/level.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/editor.js"></script>    
     <script src="js/main.js"></script>
 </body>
 </html>

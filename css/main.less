@@ -1,4 +1,5 @@
-﻿html, body {
+﻿
+html, body {
     margin:0;
     padding:0;
     overflow: hidden;
@@ -12,4 +13,41 @@ body{
 .center{
     width: 1024px;
     margin: 0 auto;
+}
+
+#tiles{
+    position:absolute;
+    top:0;
+    right:0;
+    opacity:0.7;
+    padding: 16px;
+}
+
+.tile{
+    height: 16px;
+    width: 16px;
+    margin-bottom: 16px;
+    display: inline-block;
+}
+
+#clear{
+    .tile;
+    border:1px solid red;
+}
+
+#none{
+    .tile;
+    border:1px solid blue;
+}
+
+#solid{
+    .tile;
+    background-color: #fff;
+    margin: 0px 1px 16px 1px;
+}
+
+#break{
+    .tile;
+    background-color: #0f0;
+    margin: 0px 1px 16px 1px;
 }

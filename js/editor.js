@@ -1,4 +1,140 @@
-﻿SneekMe.first = [
+﻿SneekMe.editor = function (level, width, height) {
+    function rand(num) {
+        return Math.floor(Math.random() * num);
+    }
+
+    var canvas = document.getElementById('Editor'),
+        ctx = canvas.getContext("2d"),
+        cw = 16, mid = cw / 2,
+        mouseIsDown = false,
+        right = false,
+        tiles = {
+            none: 0,
+            solid: 1,
+            breakable: 2
+        },
+        currentTile = tiles.solid;
+
+    init();
+    function init() {
+        canvas.width = width;
+        canvas.height = height;
+        drawLevel();
+
+        canvas.addEventListener('mousedown', mouseDown, false);
+        canvas.addEventListener('mouseup', mouseUp, false);
+        canvas.addEventListener('mousemove', mouseMove, false);
+        canvas.addEventListener('contextmenu', function () { event.preventDefault(); }, false);
+        document.getElementById('clear').addEventListener('click', function () {
+            for (var i = level.length; i--;) {
+                for (var j = level[0].length; j--;) {
+                    level[i][j] = tiles.none;
+                }
+            }
+            drawLevel();
+        }, false);
+        document.getElementById('none').addEventListener('click', function () {
+            currentTile = tiles.none;
+        }, false);
+        document.getElementById('solid').addEventListener('click', function () {
+            currentTile = tiles.solid;
+        }, false);
+        document.getElementById('break').addEventListener('click', function () {
+            currentTile = tiles.breakable;
+        }, false);
+        document.getElementById('save').addEventListener('click', saveLevel, false);
+    }
+
+    function saveLevel() {
+        var txt = '',
+            h = level.length,
+            w = level[0].length;
+        for (var i = 0; i < h; i++) {
+
+            if (i) txt += '-';
+            for (var j = 0; j < w; j++) {
+                if(j) txt += ';';
+                txt += level[i][j];
+            }            
+        }
+        localStorage.setItem('level', txt);
+    }
+
+    function getMousePos(event) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        };
+    }
+
+    function mouseDown(event) {
+        mouseIsDown = true;
+        if (event.which === 3) { right = true;}
+        mouseMove(event);
+        event.preventDefault();
+    }
+    function mouseUp(event) {
+        mouseIsDown = false;
+        right = false;
+        event.preventDefault();
+    }
+
+    function mouseMove(event) {
+        var pos = getMousePos(event),
+            x = Math.floor(pos.x / cw),
+            y = Math.floor(pos.y / cw);
+
+        if(mouseIsDown){
+            level[y][x] = right ? tiles.none : currentTile;
+        }
+        drawLevel();
+        ctx.strokeStyle = '#0000FF';
+        ctx.strokeRect(x * cw, y * cw, cw, cw);
+
+        event.preventDefault();
+    }
+
+    function drawLevel() {
+        ctx.clearRect(0, 0, width,  height);
+
+        var h = level.length,
+            w = level[0].length;
+
+        for (var i = h; i--;) {
+            for (var j = w; j--;) {
+                switch (level[i][j]) {
+                    case tiles.breakable:
+                        ctx.fillStyle = '#32CD32';
+                        ctx.fillRect(j * cw, i * cw, cw, cw);
+                        break;
+                    case tiles.solid:
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(j * cw, i * cw, cw, cw);
+                        break;
+                    default:
+                }
+            }
+        }
+
+        ctx.strokeStyle = "#CCCCCC";               
+        for (var i = h; i--;) {
+            ctx.beginPath();
+            ctx.moveTo(0, cw * i);
+            ctx.lineTo(width, cw * i);
+            ctx.stroke();
+        }
+
+        for (var j = w; j--;) {
+            ctx.beginPath();
+            ctx.moveTo(cw * j, 0);
+            ctx.lineTo(cw * j, height);
+            ctx.stroke();
+        }
+    }
+};
+
+SneekMe.first = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 	[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
 	[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
