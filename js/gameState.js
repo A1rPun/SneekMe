@@ -5,23 +5,27 @@
         states,
         pause = true,
         update,
-        fps = 10,
         now,
         then = Date.now(),
-        interval = 1000 / fps,
+        interval,
         delta;
 
     // constructor
-    function gameState(c, s) {
+    function gameState(f, c, s) {
         canvas = c;
         ctx = c.getContext('2d');
         states = s || {};
+        this.setFps(f || 60);
 
         if (instance) {
             return instance;
         }
         instance = this;
     }
+    gameState.prototype.setFps = function (F) {
+        interval = 1000 / F;
+    };
+
     gameState.prototype.start = function (state) {
         this.state = state;
         this.loops = 0;
@@ -31,14 +35,15 @@
             pause = false;
             queue();
         }
-    }
+    };
     gameState.prototype.stop = function () {
         pause = true;
-    }
+    };
     gameState.prototype.isState = function (state) {
         return this.state === state
-    }
+    };
 
+    //convert to global
     function loop() {
 
         if (!pause) {

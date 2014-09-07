@@ -14,15 +14,13 @@
         this.respawn();
     }
     player.prototype = {
-        registerLength: function () {
+        registerStats: function () {
             if (this.snake) {
                 var l = this.snake.length;
 
                 if (l > this.maxSnake)
                     this.maxSnake = l;
             }
-        },
-        registerLife: function(){
             if (this.life) {
                 var max = +new Date() - this.life;
 
@@ -31,11 +29,10 @@
             }
         },
         respawn: function () {
-            this.registerLife();
-            this.registerLength();
-            this.direction = 1;
+            this.registerStats();
+            this.direction = -1;
             this.snake = [];
-            this.tails = 0;
+            this.tails = 2;
             this.shots = 0;
             this.life = +new Date();
 
