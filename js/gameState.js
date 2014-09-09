@@ -1,70 +1,64 @@
 ﻿SneekMe.gameState = (function (g) {
-    var instance,
-        canvas,
-        ctx,
-        states,
-        pause = true,
-        update,
-        now,
-        then = Date.now(),
-        interval,
-        delta;
 
     // constructor
-    function gameState(f, c, s) {
-        canvas = c;
-        ctx = c.getContext('2d');
-        states = s || {};
-        this.setFps(f || 60);
+    function gameState(o) {
+        var me = this;
 
-        if (instance) {
-            return instance;
+        if (o) {
+            me.canvas = o.canvas;
+            me.ctx = o.context || me.canvas.getContext('2d');
+            me.states = o.states || {};
+            me.setFps(o.fps || 60);
         }
-        instance = this;
+        me.pause = true;
+        me.then = Date.now();
+        //bind loop to variable because of requestAnimationFrame call.
+        me.boundLoop = me.loop.bind(me);
     }
-    gameState.prototype.setFps = function (F) {
-        interval = 1000 / F;
-    };
 
-    gameState.prototype.start = function (state) {
-        this.state = state;
-        this.loops = 0;
-        update = states[this.state];
+    gameState.prototype = {
+        clear: function () {
+            var c = this.canvas;
+            this.ctx.clearRect(0, 0, c.width, c.height);
+        },
+        setFps: function (F) {
+            this.interval = 1000 / F;
+        },
+        isState: function (state) {
+            return this.state === state
+        },
+        loop: function () {
+            var me = this;
+            if (!me.pause) {
+                me.now = Date.now();
+                var delta = me.now - me.then;
 
-        if (pause) {
-            pause = false;
-            queue();
-        }
-    };
-    gameState.prototype.stop = function () {
-        pause = true;
-    };
-    gameState.prototype.isState = function (state) {
-        return this.state === state
-    };
-
-    //convert to global
-    function loop() {
-
-        if (!pause) {
-            now = Date.now();
-            delta = now - then;
-
-            if (delta > interval) {
-                then = now - (delta % interval);
-                clear();
-                update && update(delta);
+                if (delta > me.interval) {
+                    me.then = me.now - (delta % me.interval);
+                    me.clear();
+                    me.update && me.update(delta);
+                }
+                me.queue();
+                me.loops++;
             }
-            queue();
-            instance.loops++;
-        }
-    }
-    function clear() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-    function queue() {
-        g.requestAnimationFrame(loop);
-    }
+        },
+        queue: function () {
+            g.requestAnimationFrame(this.boundLoop);
+        },
+        start: function (state) {
+            var me = this;
+            me.state = state;
+            me.loops = 0;
+            me.update = me.states[me.state];
 
+            if (me.pause) {
+                me.pause = false;
+                me.queue();
+            }
+        },
+        stop: function () {
+            this.pause = true;
+        }
+    };
     return gameState;
 })(window);

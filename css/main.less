@@ -15,6 +15,30 @@ body{
     margin: 0 auto;
 }
 
+@hudheight: 32px;
+
+#hud{
+    position: absolute;
+    height: @hudheight;
+}
+
+.offsetcanvas{
+    top: @hudheight;
+}
+
+.bgcanvas{
+    .offsetcanvas;
+    position:absolute;
+    z-index:1;
+}
+
+.maincanvas{
+    .offsetcanvas;
+    position:absolute;
+    z-index:2;
+}
+
+
 #tiles{
     position:absolute;
     top:0;

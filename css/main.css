@@ -12,6 +12,23 @@ body {
   width: 640px;
   margin: 0 auto;
 }
+#hud {
+  position: absolute;
+  height: 32px;
+}
+.offsetcanvas {
+  top: 32px;
+}
+.bgcanvas {
+  top: 32px;
+  position: absolute;
+  z-index: 1;
+}
+.maincanvas {
+  top: 32px;
+  position: absolute;
+  z-index: 2;
+}
 #tiles {
   position: absolute;
   top: 0;

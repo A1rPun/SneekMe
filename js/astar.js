@@ -162,7 +162,7 @@ SneekMe.astar = (function () {
         var mypathStart = Node(null, { x: pathStart[0], y: pathStart[1] });
         var mypathEnd = Node(null, { x: pathEnd[0], y: pathEnd[1] });
         // create an array that will contain all world cells
-        var AStar = [this.worldSize];
+        var AStar = [];
         // list of currently open Nodes
         var Open = [mypathStart];
         // list of closed Nodes

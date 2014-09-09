@@ -11,9 +11,10 @@
 <body>
     <div id="output" style="position:absolute;top:0;left:0;"></div>
     <div class="center">
-        <canvas id="bg" tabindex=1 style="position:absolute; z-index:1"></canvas>
-        <canvas id="SneekMe" tabindex=1 style="position:absolute; z-index:2"></canvas>
-        <canvas id="Editor" tabindex=1 style="position:absolute; z-index:2"></canvas>
+        <canvas id="hud" class="hudcanvas"></canvas>
+        <canvas id="bg" class="bgcanvas"></canvas>
+        <canvas id="SneekMe" class="maincanvas"></canvas>
+        <canvas id="Editor" class="maincanvas"></canvas>
     </div>
     <div id="tiles" style="display:none;"> <!---->
         <div id="clear"></div>Clear all<br />

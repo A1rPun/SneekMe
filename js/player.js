@@ -1,11 +1,13 @@
 ﻿SneekMe.player = (function () {
-    var MAX_TAILS = 5,
-        MAX_LIFES = 3;
+    var DEFAULT_SNAKE_LENGTH = 9;//+1 head
     // constructor
     function player(options) {
         if (arguments[0]) for (var prop in arguments[0]) this[prop] = arguments[0][prop];
 
-        this.score = MAX_LIFES;
+        if (!this.name) {
+            this.name = 'Player';
+        }
+        this.score = 0;
         this.maxSnake = 0;
         this.maxLife = 0;
         this.foodCount = 0;
@@ -31,8 +33,7 @@
         respawn: function () {
             this.registerStats();
             this.direction = -1;
-            this.snake = [];
-            this.tails = 2;
+            this.tails = DEFAULT_SNAKE_LENGTH;
             this.shots = 0;
             this.life = +new Date();
 
