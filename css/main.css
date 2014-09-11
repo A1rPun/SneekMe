@@ -12,7 +12,7 @@ body {
   width: 640px;
   margin: 0 auto;
 }
-#hud {
+.hud {
   position: absolute;
   height: 32px;
 }
@@ -30,45 +30,97 @@ body {
   z-index: 2;
 }
 #tiles {
-  position: absolute;
-  top: 0;
-  right: 0;
-  opacity: 0.7;
-  padding: 16px;
+  height: 32px;
+  width: 640px;
+  background-color: #000;
+}
+.hudcontainer {
+  float: left;
+  padding-right: 8px;
+}
+.btnrow {
+  height: 16px;
+}
+.btn {
+  height: 12px;
+  border: none;
+  background: blue;
+  color: white;
+  width: 50px;
+  margin: 2px;
+  font-size: 0.6em;
+  cursor: pointer;
+}
+.mode {
+  margin: 1px 2px;
+  height: 28px;
+  width: 28px;
+  display: inline-block;
+  cursor: pointer;
+}
+#dot {
+  margin: 1px 2px;
+  height: 28px;
+  width: 28px;
+  display: inline-block;
+  cursor: pointer;
+  background-color: blue;
+}
+#line {
+  margin: 1px 2px;
+  height: 28px;
+  width: 28px;
+  display: inline-block;
+  cursor: pointer;
+  background-color: blue;
+}
+#box {
+  margin: 1px 2px;
+  height: 28px;
+  width: 28px;
+  display: inline-block;
+  cursor: pointer;
+  background-color: blue;
+}
+#fill {
+  margin: 1px 2px;
+  height: 28px;
+  width: 28px;
+  display: inline-block;
+  cursor: pointer;
+  background-color: blue;
 }
 .tile {
+  margin: 8px 2px;
   height: 16px;
   width: 16px;
-  margin-bottom: 16px;
   display: inline-block;
+  cursor: pointer;
 }
-#clear {
-  height: 16px;
-  width: 16px;
-  margin-bottom: 16px;
-  display: inline-block;
-  border: 1px solid red;
+.tile-active {
+  border: 1px solid #f00;
 }
 #none {
+  margin: 8px 2px;
   height: 16px;
   width: 16px;
-  margin-bottom: 16px;
   display: inline-block;
-  border: 1px solid blue;
+  cursor: pointer;
+  background-color: blue;
 }
 #solid {
+  margin: 8px 2px;
   height: 16px;
   width: 16px;
-  margin-bottom: 16px;
   display: inline-block;
+  cursor: pointer;
   background-color: #ccc;
-  margin: 0px 1px 16px 1px;
 }
 #break {
+  margin: 8px 2px;
   height: 16px;
   width: 16px;
-  margin-bottom: 16px;
   display: inline-block;
+  cursor: pointer;
   background-color: #999;
-  margin: 0px 1px 16px 1px;
 }

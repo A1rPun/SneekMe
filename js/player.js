@@ -31,8 +31,7 @@
             }
         },
         respawn: function () {
-            this.registerStats();
-            this.direction = -1;
+            this.registerStats();            
             this.tails = DEFAULT_SNAKE_LENGTH;
             this.shots = 0;
             this.life = +new Date();
@@ -40,6 +39,10 @@
             if (this.isComputer) {
                 this.path = [];
                 this.count = 0;
+                this.autoPilot = false;
+                this.direction = 1;//random?
+            } else {
+                this.direction = -1;
             }
         }
     };

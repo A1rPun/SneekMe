@@ -9,20 +9,41 @@
     <link href="css/main.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-    <div id="output" style="position:absolute;top:0;left:0;"></div>
+    <div id="output" style="position: absolute; top: 0; left: 0;"></div>
     <div class="center">
-        <canvas id="hud" class="hudcanvas"></canvas>
+        <canvas id="hud" class="hud"></canvas>
         <canvas id="bg" class="bgcanvas"></canvas>
         <canvas id="SneekMe" class="maincanvas"></canvas>
+
+        <div id="tiles" class="hud" style="display:none;">
+            <div class="hudcontainer">
+                <div class="btnrow">
+                    <button class="btn" id="new">New</button>
+                    <button class="btn" id="load">Load</button>
+                    <button class="btn" id="save">Save</button>
+                    <button class="btn" id="share">Share</button>
+                </div>
+                <div class="btnrow">
+                    <button class="btn" id="exit">Exit</button>
+                    <button class="btn" id="theme">Theme</button>
+                    <button class="btn" id="undo">Undo</button>
+                </div>
+            </div>
+            <div class="hudcontainer">
+                <div class="tile-active" id="dot" title="Dots">&nbsp;...</div>
+                <div id="line" title="Line">&nbsp;|</div>
+                <div id="box" title="Rectangle">&nbsp;[]</div>
+                <div id="fill" title="Fill area">&nbsp;|_|</div>
+            </div>
+            <div class="hudcontainer">
+                <div id="none" title="Erase tile">&nbsp;</div>
+                <div id="solid" class="tile-active" title="Solid tile">&nbsp;</div>
+                <div id="break" title="Breakable tile">&nbsp;</div>
+            </div>
+        </div>
         <canvas id="Editor" class="maincanvas"></canvas>
     </div>
-    <div id="tiles" style="display:none;"> <!---->
-        <div id="clear"></div>Clear all<br />
-        <div id="none"></div>Empty<br />
-        <div id="solid"></div>Solid<br />
-        <div id="break"></div>Breakable<br />
-        <button id="save">Save</button>   
-    </div>
+
     <!-- Scripts -->
     <script type="text/javascript">
         window.SneekMe = window.SneekMe || {};
@@ -31,7 +52,7 @@
     <script src="js/gameState.js"></script>
     <script src="js/player.js"></script>
     <script src="js/game.js"></script>
-    <script src="js/editor.js"></script>    
+    <script src="js/editor.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

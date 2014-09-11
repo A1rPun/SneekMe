@@ -17,7 +17,7 @@ body{
 
 @hudheight: 32px;
 
-#hud{
+.hud{
     position: absolute;
     height: @hudheight;
 }
@@ -40,38 +40,86 @@ body{
 
 
 #tiles{
-    position:absolute;
-    top:0;
-    right:0;
-    opacity:0.7;
-    padding: 16px;
+    //position:absolute;
+    //top:0;
+    //left:0;
+    //opacity:0.7;
+    height: @hudheight;
+    width: 640px;
+    background-color: #000;
+}
+
+.hudcontainer{
+    float:left;
+    padding-right: 8px;
+}
+
+.btnrow{
+    height: @hudheight / 2;
+}
+
+.btn{
+    height: @hudheight / 2 - 4;
+    border: none;
+    background: blue;
+    color: white;
+    width: 50px;
+    margin: 2px;
+    font-size: 0.6em;
+    cursor: pointer;
+}
+
+.mode{
+    margin: 1px 2px;
+    height: @hudheight - 4;
+    width: @hudheight - 4;
+    display: inline-block;
+    cursor: pointer;
+}
+
+#dot{
+    .mode;
+    background-color: blue;
+}
+
+#line{
+    .mode;
+    background-color: blue;
+}
+
+#box{
+    .mode;
+    background-color: blue;
+}
+
+#fill{
+    .mode;
+    background-color: blue;
 }
 
 .tile{
+    margin: 8px 2px;
     height: 16px;
     width: 16px;
-    margin-bottom: 16px;
     display: inline-block;
+    cursor: pointer;
 }
 
-#clear{
-    .tile;
-    border:1px solid red;
+.tile-active{
+    border: 1px solid #f00;
 }
 
 #none{
     .tile;
-    border:1px solid blue;
+    background-color: blue;
 }
 
 #solid{
     .tile;
     background-color: #ccc;
-    margin: 0px 1px 16px 1px;
 }
 
 #break{
     .tile;
     background-color: #999;
-    margin: 0px 1px 16px 1px;
 }

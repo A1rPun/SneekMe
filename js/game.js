@@ -40,8 +40,9 @@
         height = level.length * cw,
         width = level[0].length * cw,
         mid = cw / 2,
+        AUTOPILOTCOUNT = 20,
         //Number of point to win
-        MAX_SCORE = 1337,
+        MAX_SCORE = 10,
         //Number of meal
         MAX_FOODS = 10,
         //Number of weapons
@@ -62,7 +63,7 @@
         //Point lost when hit
         HIT_PENALTY = 1,
         //PICKUP_INTERVAL
-        PICKUP_INTERVAL = 1000,
+        PICKUP_INTERVAL = 2000,
         pickip_loop,
         foods,
         weapons,
@@ -80,7 +81,7 @@
             right: 39,
             down: 40,
             shoot: 16,
-            //isComputer: true
+            isComputer: true
         }),
         /* */
         new SneekMe.player({
@@ -209,11 +210,10 @@
         }
     }
 
-    function gameOver() {
+    function gameOver(winner) {
         var maxSnake = { value: 0, index: -1 },
             maxLife = { value: 0, index: -1 },
             foodCount = { value: 0, index: -1 },
-            shotsFired = { value: 0, index: -1 },
             shotsHit = { value: 0, index: -1, fired: 0 };
 
         for (var i = players.length; i--;) {
@@ -234,11 +234,6 @@
                 foodCount.value = player.foodCount;
             }
 
-            if (player.shotsFired > shotsFired.value) {
-                shotsFired.index = i;
-                shotsFired.value = player.shotsFired;
-            }
-
             if (player.shotsHit > shotsHit.value) {
                 shotsHit.index = i;
                 shotsHit.value = player.shotsHit;
@@ -246,15 +241,14 @@
             }
         }
 
-        //TODO: fix .index === -1
-        log([
-            'Longest snake: ' + maxSnake.value + ' '+ players[maxSnake.index].name,
-            'Longest life: ' + ~~(maxLife.value / 1000) + 's '+ players[maxLife.index].name,
-            'Most foods: ' + foodCount.value + ' '+ players[foodCount.index].name,
-            'Bulltis fired: ' + shotsFired.value + ' '+ players[shotsFired.index].name,
-            'Bullits hit: ' + shotsHit.value + ' '+ players[shotsHit.index].name,
-            'Accuracy: ' + (shotsHit.value / shotsHit.fired * 100).toFixed(2) + '% '+ players[shotsHit.index].name
-        ].join('<br>'));
+        var stats = [];
+        ~maxSnake.index && stats.push('Winner: ' + players[winner].name);
+        ~maxSnake.index && stats.push('Longest snake: ' + maxSnake.value + ' ' + players[maxSnake.index].name);
+        ~maxLife.index && stats.push('Longest life: ' + ~~(maxLife.value / 1000) + 's ' + players[maxLife.index].name);
+        ~foodCount.index && stats.push('Most foods: ' + foodCount.value + ' ' + players[foodCount.index].name);
+        ~shotsHit.index && stats.push('Bullits hit: ' + shotsHit.value + ' of ' + shotsHit.fired +
+                        ' (' + (shotsHit.value / shotsHit.fired * 100).toFixed(2) + '%) ' + players[shotsHit.index].name);
+        log(stats.join('<br>'));
 
         clearInterval(pickip_loop);
         gameState.stop();
@@ -305,6 +299,14 @@
         return ox === nx ? (oy < ny ? 2 : 0) : (ox < nx ? 1 : 3);
     }
 
+    function calculateDirection(ox, oy, d) {
+        if (d == 0) oy--;
+        else if (d == 1) ox++;
+        else if (d == 2) oy++;
+        else if (d == 3) ox--;
+        return [ox, oy];
+    }
+
     function moveComputer(player) {
         var d = player.direction,
             ox = player.snake[0].x,
@@ -315,40 +317,64 @@
             //log('findPath', ox, oy, ' target', player.tx, player.ty);
             //pathFinder.findPath(ox, oy, player.tx, player.ty, function (path) {
             var path = pathFinder.findPath([ox, oy], [player.tx, player.ty]);
-            if (path === null || path.length < 2) {//alert("Path was not found.");
+            if (path === null || path.length < 2) {
                 //log('OH NOES WHATTODO');
-                //TODO: FIND empty spot and reduce call to findpath
-                if (player.direction === -1) player.direction = rand(2) + 1;
+                player.autoPilot = true;
+                player.path = [];
+                player.count = 0;
+                autoPilot();
             } else {
-                player.path = path;
+                player.autoPilot = false;
+                player.path = path;                
                 player.count = 1;
-                var newDirection = player.path[player.count];
+                var newDirection = player.path[1];//player.count
                 player.direction = findDirection(ox, oy, newDirection[0], newDirection[1]);
             }
-            //pathFinder.calculate();
         }
 
-        if (!(player.tx > -1) || level[player.ty][player.tx] !== tiles.food) {
-            var f = foods[rand(foods.length - 1)];
-            player.tx = f.x;
-            player.ty = f.y;
-            findPath();
-        } else if (player.count >= player.path.length) {
-            findPath();
-        } else {
-            var path = player.path[player.count],
-                nx = path[0],
-                ny = path[1];
-                //nx = player.path[player.count].x,
-                //ny = player.path[player.count].y;
+        function autoPilot() {
+            var dir = calculateDirection(ox, oy, d);
 
-            if (acceptable.indexOf(level[ny][nx]) === -1) {
-                findPath();
-            } else {
-                player.direction = findDirection(ox, oy, nx, ny);
+            if (!pathFinder.canWalkHere(dir[0], dir[1])) {
+                //log('DAMN IM STUCK');
+                var rescue = pathFinder.Neighbours(ox, oy);
+
+                if (rescue.length) {
+                    rescue = rescue[0];//maybe random?
+                    
+                    var newDirection = findDirection(ox, oy, rescue.x, rescue.y);
+                    player.direction = newDirection;
+                    //log('gonna go this way ' + d + ' ' + newDirection);
+                } else {
+                    //log('CRASH');
+                }
             }
         }
 
+        if (player.autoPilot && player.count < AUTOPILOTCOUNT) { 
+            autoPilot();
+        } else {
+
+            if (!(player.tx > -1) || level[player.ty][player.tx] !== tiles.food) {
+                var f = foods[rand(foods.length - 1)];
+                player.tx = f.x;
+                player.ty = f.y;
+                findPath();
+            } else if (player.count >= player.path.length) {
+                findPath();
+            } else {
+                var path = player.path[player.count],
+                    nx = path[0],
+                    ny = path[1];
+
+                if (acceptable.indexOf(level[ny][nx]) === -1) {
+                    findPath();
+                } else {
+                    player.direction = findDirection(ox, oy, nx, ny);
+                }
+            }
+        }
+        
         if (player.shots && rand(100) > 95) {
             shoot(player);
         }
@@ -429,10 +455,9 @@
             if (bullit.distance)
                 level[bullit.y][bullit.x] = tiles.none;
 
-            if (bullit.direction == 0) bullit.y--;
-            else if (bullit.direction == 1) bullit.x++;
-            else if (bullit.direction == 2) bullit.y++;
-            else if (bullit.direction == 3) bullit.x--;
+            var dir = calculateDirection(bullit.x, bullit.y, bullit.direction);
+            bullit.x = dir[0];
+            bullit.y = dir[1];
 
             if (bullit.x < bounds.left ||
                 bullit.x > bounds.right ||
@@ -500,10 +525,9 @@
 
             if (d === -1) continue;
 
-            if (d == 0) ny--;
-            else if (d == 1) nx++;
-            else if (d == 2) ny++;
-            else if (d == 3) nx--;
+            var dir = calculateDirection(nx, ny, d);
+            nx = dir[0];
+            ny = dir[1];
 
             //Wrap around
             if (nx < bounds.left) {
@@ -574,7 +598,7 @@
             player.registerStats();
 
             if (player.score >= MAX_SCORE) {
-                gameOver();
+                gameOver(player.id);
             }
         }
 

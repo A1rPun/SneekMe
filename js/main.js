@@ -59,6 +59,25 @@
             sound.play();
         }
     };
+    SneekMe.store = {
+        get: function (key) {
+            if (localStorage) {
+                var value = localStorage.getItem(key);
+                if (!value) return value;
+
+                try {
+                    value = JSON.parse(value);
+                } catch (e) { }
+                return value;
+            }
+        },
+        set: function (key, obj) {
+            if (localStorage) {
+                if (typeof obj === 'object') obj = JSON.stringify(obj);
+                localStorage.setItem(key, obj);
+            }
+        }
+    };
 
     var bg = document.getElementById('bg'),
         bgctx = bg.getContext("2d"),
@@ -101,17 +120,10 @@
         bgctx.drawImage(images.bg, 0, 0, width, height);
 
         var level = SneekMe.debug,
-            lvl = localStorage.getItem('level');
-
+            lvl = SneekMe.store.get('level');
+        
         if (lvl) {
-            var lvlh = lvl.split('-');
-            for (var i = 0, l = lvlh.length; i < l; i++) {
-
-                var lvlw = lvlh[i].split(';');
-                for (var j = 0, k = lvlw.length; j < k; j++) {
-                    level[i][j] = +lvlw[j];
-                }
-            }
+            level = lvl;
         }
 
         SneekMe.startGame(level, cw);
