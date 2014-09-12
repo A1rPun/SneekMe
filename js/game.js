@@ -17,12 +17,13 @@
             solid: 1,
             breakable: 2,
             food: 50,
-            weapon: 51,
+            goldfood: 55,
+            weapon: 22,
             bullit: 66,
             deadSnake: 88,
             snake: 99
         },
-        acceptable = [tiles.none, tiles.food, tiles.weapon],
+        acceptable = [tiles.none, tiles.food, tiles.goldfood, tiles.weapon],
         pathFinder = new SneekMe.astar();
     pathFinder.setAcceptableTiles(acceptable);
     pathFinder.setGrid(level);
@@ -50,10 +51,13 @@
         MAX_SHOTS = 10,
         //Increase snake length
         ADD_TAILS = 5,
+        ADD_GOLD_TAILS = 25,
         //Add shots
         ADD_SHOTS = 1,
         //Point got when snake eats food
         ADD_FOOD_SCORE = 1,
+        //Point got when snake eats goldfood
+        ADD_GOLD_FOOD_SCORE = 3,
         //Point got when shot a snake
         ADD_HIT_SCORE = 2,
         //Point got when a snake crashes on you
@@ -64,6 +68,7 @@
         HIT_PENALTY = 1,
         //PICKUP_INTERVAL
         PICKUP_INTERVAL = 2000,
+        GOLD_CHANCE = 2,//of 100
         pickip_loop,
         foods,
         weapons,
@@ -81,7 +86,7 @@
             right: 39,
             down: 40,
             shoot: 16,
-            isComputer: true
+            //isComputer: true
         }),
         /* */
         new SneekMe.player({
@@ -93,7 +98,7 @@
             up: 87,
             right: 68,
             down: 83,
-            shoot: 16,//tab...replace
+            shoot: 81,//Q
             isComputer: true
         }),
         /* */
@@ -121,7 +126,7 @@
             shoot: 96,
             isComputer: true
         }),
-        /* /
+        /* */
         new SneekMe.player({
             id: 4,
             name: 'Green',
@@ -163,7 +168,7 @@
     function init(images) {
         canvas.width = width;
         canvas.height = height;
-        hud.width = 640;
+        hud.width = 800; //width
         hud.height = 32;
         foods = [];
         weapons = [];
@@ -242,7 +247,7 @@
         }
 
         var stats = [];
-        ~maxSnake.index && stats.push('Winner: ' + players[winner].name);
+        stats.push('Winner: ' + players[winner].name);
         ~maxSnake.index && stats.push('Longest snake: ' + maxSnake.value + ' ' + players[maxSnake.index].name);
         ~maxLife.index && stats.push('Longest life: ' + ~~(maxLife.value / 1000) + 's ' + players[maxLife.index].name);
         ~foodCount.index && stats.push('Most foods: ' + foodCount.value + ' ' + players[foodCount.index].name);
@@ -286,7 +291,12 @@
     function create_food() {
         var pos = findEmptyPos();
         foods.push(pos);
-        level[pos.y][pos.x] = tiles.food;
+
+        if (rand(100) < GOLD_CHANCE) {
+            level[pos.y][pos.x] = tiles.goldfood;
+        } else {
+            level[pos.y][pos.x] = tiles.food;
+        }
     }
 
     function create_weapon() {
@@ -355,7 +365,7 @@
             autoPilot();
         } else {
 
-            if (!(player.tx > -1) || level[player.ty][player.tx] !== tiles.food) {
+            if (!(player.tx > -1) || !(level[player.ty][player.tx] === tiles.food || level[player.ty][player.tx] === tiles.goldfood)) {
                 var f = foods[rand(foods.length - 1)];
                 player.tx = f.x;
                 player.ty = f.y;
@@ -375,7 +385,7 @@
             }
         }
         
-        if (player.shots && rand(100) > 95) {
+        if (player.shots && rand(100) > 98) {
             shoot(player);
         }
     }
@@ -558,13 +568,15 @@
                 continue;
             }
 
+            var tile = level[ny][nx];
             //Create a new head instead of moving the tail
-            if (level[ny][nx] === tiles.food) {
+            if (tile === tiles.food || tile === tiles.goldfood) {
+                var gold = tile === tiles.goldfood;
                 SneekMe.playSound('food');
                 check_collision(nx, ny, foods, true);                
                 player.foodCount++;
-                player.tails += ADD_TAILS;
-                player.score += ADD_FOOD_SCORE;
+                player.tails += gold ? ADD_GOLD_TAILS : ADD_TAILS;
+                player.score += gold ? ADD_GOLD_FOOD_SCORE : ADD_FOOD_SCORE;
 
                 //Create new food
                 if (foods.length < players.length) {
@@ -572,7 +584,7 @@
                 }
 
                 drawHud();
-            } else if (level[ny][nx] === tiles.weapon) {
+            } else if (tile === tiles.weapon) {
                 SneekMe.playSound('weapon');
                 check_collision(nx, ny, weapons, true);
                 player.shots += ADD_SHOTS;
@@ -622,12 +634,15 @@
                         ctx.fillRect(j * cw, i * cw, cw, cw);
                         break;
                     case tiles.food:
-                        ctx.fillStyle = '#00FF00';
-                        ctx.fillRect(j * cw, i * cw, cw, cw);
+                        //ctx.fillStyle = '#00FF00';
+                        ctx.drawImage(SneekMe.images.food, j * cw, i * cw, cw, cw);
+                        break;
+                    case tiles.goldfood:
+                        ctx.drawImage(SneekMe.images.goldfood, j * cw, i * cw, cw, cw);
                         break;
                     case tiles.weapon:
-                        ctx.fillStyle = '#0000FF';
-                        ctx.fillRect(j * cw, i * cw, cw, cw);
+                        //ctx.fillStyle = '#0000FF';
+                        ctx.drawImage(SneekMe.images.weapon, j * cw, i * cw, cw, cw);
                         break;
                     case tiles.bullit:
                         ctx.fillStyle = '#FF0000';
@@ -643,66 +658,88 @@
         }
     }
 
-    function drawSnake() {
-        
+    function drawSnake() {        
         ctx.lineWidth = 2;
+        var crown = { value: 0, index: -1 };
 
-        for (var i = players.length; i--;) {
+        //for (var i = 0, len = players.length; i< len; i++) {
+        for (var i = players.length; i--;){
             var player = players[i];
+            if (!player.snake.length) continue;
 
-            if (player.snake.length) {
-                var x = player.snake[0].x * cw,
-                    y = player.snake[0].y * cw,
-                    lastIndex = player.snake.length - 1;
-                //paint head of snake
-                ctx.fillStyle = player.head;
-                ctx.fillRect(x, y, cw, cw);
+            var x = player.snake[0].x * cw,
+                y = player.snake[0].y * cw,
+                lastIndex = player.snake.length - 1;
 
-                if (player.direction === -1) {
-                    ctx.strokeStyle = player.head;
-                    ctx.beginPath();
-                    ctx.arc(x + mid, y + mid, cw + cw, 0, 2 * Math.PI, false);
-                    ctx.stroke();
+            if (player.score > crown.value) {
+                crown.index = i;
+                crown.value = player.score;
+            }
+
+            //paint head of snake
+            ctx.fillStyle = player.head;
+            ctx.fillRect(x, y, cw, cw);
+
+            if (player.direction === -1) {
+                ctx.strokeStyle = player.head;
+                ctx.beginPath();
+                ctx.arc(x + mid, y + mid, cw + cw, 0, 2 * Math.PI, false);
+                ctx.stroke();
+            }
+
+            if (lastIndex > 0) {                    
+                //paint body of snake
+                ctx.fillStyle = player.body;
+                for (var j = 1; j < lastIndex; j++) {
+                    ctx.fillRect(player.snake[j].x * cw, player.snake[j].y * cw, cw, cw);
                 }
 
-                if (lastIndex > 0) {                    
-                    //paint body of snake
-                    ctx.fillStyle = player.body;
-                    for (var j = 1; j < lastIndex; j++) {
-                        ctx.fillRect(player.snake[j].x * cw, player.snake[j].y * cw, cw, cw);
-                    }
+                //Draw last body
+                var l = player.snake[lastIndex],
+                    ld = findDirection(l.x, l.y, player.snake[lastIndex - 1].x, player.snake[lastIndex - 1].y),
+                    lx = l.x * cw,
+                    ly = l.y * cw;
 
-                    //Draw last body
-                    var l = player.snake[lastIndex],
-                        ld = findDirection(l.x, l.y, player.snake[lastIndex - 1].x, player.snake[lastIndex - 1].y),
-                        lx = l.x * cw,
-                        ly = l.y * cw;
+                ctx.beginPath();
 
-                    ctx.beginPath();
-
-                    if (ld === 0) {
-                        //down
-                        ctx.moveTo(lx, ly);
-                        ctx.lineTo(lx + cw, ly);
-                        ctx.lineTo(lx + mid, ly + cw);
-                    } else if(ld === 1){
-                        //left
-                        ctx.moveTo(lx + cw, ly);
-                        ctx.lineTo(lx + cw, ly + cw);
-                        ctx.lineTo(lx, ly + mid);
-                    } else if (ld === 2) {
-                        //up
-                        ctx.moveTo(lx + mid, ly);
-                        ctx.lineTo(lx + cw, ly + cw);
-                        ctx.lineTo(lx, ly + cw);
-                    } else {
-                        //right
-                        ctx.moveTo(lx, ly);
-                        ctx.lineTo(lx + cw, ly + mid);
-                        ctx.lineTo(lx, ly + cw);                        
-                    }
-                    ctx.fill();
+                if (ld === 0) {
+                    //down
+                    ctx.moveTo(lx, ly);
+                    ctx.lineTo(lx + cw, ly);
+                    ctx.lineTo(lx + mid, ly + cw);
+                } else if(ld === 1){
+                    //left
+                    ctx.moveTo(lx + cw, ly);
+                    ctx.lineTo(lx + cw, ly + cw);
+                    ctx.lineTo(lx, ly + mid);
+                } else if (ld === 2) {
+                    //up
+                    ctx.moveTo(lx + mid, ly);
+                    ctx.lineTo(lx + cw, ly + cw);
+                    ctx.lineTo(lx, ly + cw);
+                } else {
+                    //right
+                    ctx.moveTo(lx, ly);
+                    ctx.lineTo(lx + cw, ly + mid);
+                    ctx.lineTo(lx, ly + cw);                        
                 }
+                ctx.fill();
+            }
+        }
+
+        if (~crown.index) {
+            var p = players[crown.index],
+                crownDirection = p.direction === 1 || p.direction === 3 ? 0 : 1,
+                crownPos = calculateDirection(p.snake[0].x, p.snake[0].y, crownDirection);
+
+            if (crownDirection) {
+                ctx.save();
+                ctx.translate(crownPos[0] * cw + mid, crownPos[1] * cw + mid);
+                ctx.rotate(90 * Math.PI / 180);
+                ctx.drawImage(SneekMe.images.crown, -mid, -mid);
+                ctx.restore();
+            } else {                
+                ctx.drawImage(SneekMe.images.crown, crownPos[0] * cw, crownPos[1] * cw);
             }
         }
     }

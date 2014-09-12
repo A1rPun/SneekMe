@@ -1,4 +1,7 @@
 ﻿(function () {
+    //Default level
+    var level = SneekMe.debug;
+
     function makeImages(images, callback) {
         var result = {},
             loads = 0,
@@ -63,11 +66,6 @@
         get: function (key) {
             if (localStorage) {
                 var value = localStorage.getItem(key);
-                if (!value) return value;
-
-                try {
-                    value = JSON.parse(value);
-                } catch (e) { }
                 return value;
             }
         },
@@ -79,15 +77,37 @@
         }
     };
 
+    SneekMe.saveLevel = function (lvl) {
+        SneekMe.store.set('level', lvl);
+    }
+
+    SneekMe.loadLevel = function (lvl) {
+        if (!lvl) return;
+
+        try {
+            lvl = JSON.parse(lvl);
+        } catch (e) { }
+        //is valid level
+        if (Array.isArray(lvl) && lvl.length === level.length) {
+            //TODO: loop every row to check lengths
+            return lvl;
+        }
+    }
+
     var bg = document.getElementById('bg'),
         bgctx = bg.getContext("2d"),
-        cw = 8,
+        cw = 10,
         width = 80 * cw,
         height = 56 * cw;
 
     makeImages({
-        /*bg: 'img/steel.jpg'*/
-        bg: 'img/wood.jpg'
+        bg: 'img/steelpix.jpg',
+        //bg: 'img/wood.jpg',
+        //bg: 'img/ground.jpg',
+        food: 'img/food.png',
+        crown: 'img/crown.png',
+        weapon: 'img/weapon.png',
+        goldfood: 'img/goldfood.png'
     }, init);
 
     makeAudio({
@@ -105,6 +125,7 @@
 
     function init(images) {
         SneekMe.keys = [];
+        SneekMe.images = images;
         document.addEventListener('keydown', function (e) {
             e = e ? e : window.event;
             SneekMe.keys[e.keyCode] = true;
@@ -119,13 +140,12 @@
         bg.height = height;
         bgctx.drawImage(images.bg, 0, 0, width, height);
 
-        var level = SneekMe.debug,
-            lvl = SneekMe.store.get('level');
-        
+        var lvl = SneekMe.loadLevel(SneekMe.store.get('level'));
+
         if (lvl) {
             level = lvl;
         }
-
+        
         SneekMe.startGame(level, cw);
         //SneekMe.editor(level, cw);
     }

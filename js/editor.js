@@ -164,17 +164,15 @@
     function loadLevel() {
         var lvl = prompt('Enter level here', '');
 
-        try {
-            lvl = JSON.parse(lvl);
-        } catch (e) { }
+        lvl = SneekMe.loadLevel(lvl);
 
-        if (Array.isArray(lvl) && lvl.length === level.length) {
+        if (lvl) {
             level = lvl;
         }
     }
 
     function saveLevel() {
-        SneekMe.store.set('level', level);
+        SneekMe.saveLevel(level);
     }
 
     function getMousePos(event) {

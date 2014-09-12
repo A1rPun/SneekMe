@@ -9,7 +9,7 @@ body {
   color: #fff;
 }
 .center {
-  width: 640px;
+  width: 800px;
   margin: 0 auto;
 }
 .hud {
@@ -31,7 +31,7 @@ body {
 }
 #tiles {
   height: 32px;
-  width: 640px;
+  width: 800px;
   background-color: #000;
 }
 .hudcontainer {
