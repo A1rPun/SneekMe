@@ -43,6 +43,7 @@
                 this.direction = 1;//random?
             } else {
                 this.direction = -1;
+                this.directions = [];
             }
         }
     };

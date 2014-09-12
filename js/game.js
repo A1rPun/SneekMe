@@ -80,7 +80,7 @@
             id: 0,
             name: 'Blue',
             head: '#1E1959',
-            body: '#373276',            
+            body: '#373276',
             left: 37,
             up: 38,
             right: 39,
@@ -126,7 +126,7 @@
             shoot: 96,
             isComputer: true
         }),
-        /* */
+        /* /
         new SneekMe.player({
             id: 4,
             name: 'Green',
@@ -182,8 +182,8 @@
         paint();
         drawHud();
 
-        SneekMe.keyHandler = function () {
-            if (SneekMe.keys[32]) {
+        SneekMe.keyHandler = function (key) {
+            if (key === 32) {
                 if (pause) {
                     pause = false;
                     gameState.start('game');                    
@@ -191,6 +191,23 @@
                     pause = true;
                     gameState.stop();
                     drawPause();
+                }
+            }
+            
+            for (var i = players.length; i--;) {
+                var player = players[i];
+                if (player.isComputer) continue;
+
+                if (key === player.left) {
+                    player.directions.push(3);//left
+                } else if (key === player.up) {
+                    player.directions.push(0);//up
+                } else if (key === player.right) {
+                    player.directions.push(1);//right
+                } else if (key === player.down) {
+                    player.directions.push(2);//down
+                } else if (key === player.shoot && player.shots) {
+                    shoot(player);
                 }
             }
         }
@@ -391,32 +408,31 @@
     }
 
     function moveHuman(player) {
-        //TODO: for speedkeys
-        //1. go pressed direction 
-        //2. set pressed key to false
-        //3. moveHuman again
-        //4. ???????
-        //5. PROFIT
+        if (player.directions.length) {
+            var d = player.direction,
+                newDirection = -1;
 
-        function setDirection(direction){
-            if (player.direction === -1)
+            if (d === -1)
                 SneekMe.playSound('start');
-            player.direction = direction;
+
+            while (newDirection === -1 && player.directions.length) {
+                var dir = player.directions.shift();
+
+                if (dir === 3 && d !== 3 && d !== 1) {
+                    newDirection = 3;//left
+                } else if (dir === 0 && d !== 0 && d !== 2) {
+                    newDirection = 0;//up
+                } else if (dir === 1 && d !== 1 && d !== 3) {
+                    newDirection = 1;//right
+                } else if (dir === 2 && d !== 2 && d !== 0) {
+                    newDirection = 2;//down
+                }
+            }
+
+            if (~newDirection) {
+                player.direction = newDirection;
+            }
         }
-
-        var d = player.direction;
-
-        if (SneekMe.keys[player.left] && d !== 1) { //right
-            setDirection(3);//left
-        } else if (SneekMe.keys[player.up] && d !== 2) {//down
-            setDirection(0);//up
-        } else if (SneekMe.keys[player.right] && d !== 3) {//left
-            setDirection(1);//right
-        } else if (SneekMe.keys[player.down] && d !== 0) {//up
-            setDirection(2);//down
-        } else if (SneekMe.keys[player.shoot] && player.shots) {
-            shoot(player);
-        }        
     }
 
     function respawn(player) {

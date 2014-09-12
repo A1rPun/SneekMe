@@ -129,9 +129,9 @@
         document.addEventListener('keydown', function (e) {
             e = e ? e : window.event;
             SneekMe.keys[e.keyCode] = true;
+            SneekMe.keyHandler && SneekMe.keyHandler(e.keyCode);
         });
-        document.addEventListener('keyup', function (e) {
-            SneekMe.keyHandler && SneekMe.keyHandler();
+        document.addEventListener('keyup', function (e) {            
             e = e ? e : window.event;
             SneekMe.keys[e.keyCode] = false;
         });
