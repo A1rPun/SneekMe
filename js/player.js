@@ -10,6 +10,7 @@
         this.score = 0;
         this.maxSnake = 0;
         this.maxLife = 0;
+        this.respawns = -1;
         this.foodCount = 0;
         this.shotsFired = 0;
         this.shotsHit = 0;
@@ -31,6 +32,7 @@
             }
         },
         respawn: function () {
+            this.respawns++;
             this.registerStats();            
             this.tails = DEFAULT_SNAKE_LENGTH;
             this.shots = 0;

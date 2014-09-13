@@ -1,4 +1,4 @@
-﻿SneekMe.startGame = function (level, cw) {
+﻿SneekMe.startGame = function (players, level, tiles, cw, callback) {
     function rand(num) {
         return Math.floor(Math.random() * num);
     }
@@ -12,18 +12,7 @@
         output.innerHTML = txt + '<BR>' + output.innerHTML;
     }
 
-    var tiles = {
-            none: 0,
-            solid: 1,
-            breakable: 2,
-            food: 50,
-            goldfood: 55,
-            weapon: 22,
-            bullit: 66,
-            deadSnake: 88,
-            snake: 99
-        },
-        acceptable = [tiles.none, tiles.food, tiles.goldfood, tiles.weapon],
+    var acceptable = [tiles.none, tiles.food, tiles.goldfood, tiles.weapon],
         pathFinder = new SneekMe.astar();
     pathFinder.setAcceptableTiles(acceptable);
     pathFinder.setGrid(level);
@@ -74,89 +63,6 @@
         weapons,
         bullits,
         pause = false,
-        players = [
-        /* */
-        new SneekMe.player({
-            id: 0,
-            name: 'Blue',
-            head: '#1E1959',
-            body: '#373276',
-            left: 37,
-            up: 38,
-            right: 39,
-            down: 40,
-            shoot: 16,
-            //isComputer: true
-        }),
-        /* */
-        new SneekMe.player({
-            id: 1,
-            name: 'Purple',
-            head: '#3B1255',
-            body: '#562A72',
-            left: 65,
-            up: 87,
-            right: 68,
-            down: 83,
-            shoot: 81,//Q
-            isComputer: true
-        }),
-        /* */
-        new SneekMe.player({
-            id: 2,
-            name: 'Red',
-            head: '#801515',
-            body: '#AA3939',
-            left: 74,
-            up: 73,
-            right: 76,
-            down: 75,
-            shoot: 76,
-            isComputer: true
-        }),
-        new SneekMe.player({
-            id: 3,
-            name: 'Yellow',
-            head: '#806815',
-            body: '#AA9139',
-            left: 100,
-            up: 104,
-            right: 102,
-            down: 101,
-            shoot: 96,
-            isComputer: true
-        }),
-        /* /
-        new SneekMe.player({
-            id: 4,
-            name: 'Green',
-            head: '#196811',
-            body: '#378B2E',
-            isComputer: true
-        }),
-        new SneekMe.player({
-            id: 5,
-            name: 'Teal',
-            head: '#0D4C4C',
-            body: '#226666',
-            isComputer: true
-        }),
-        new SneekMe.player({
-            id: 6,
-            name: 'Pink',
-            head: '#671140',
-            body: '#892D5F',
-            isComputer: true
-        }),
-        new SneekMe.player({
-            id: 7,
-            name: 'Grey',
-            head: '#333333',
-            body: '#707070',
-            isComputer: true
-        }),
-        /* */
-        ],
         bounds = {
             top: 0,
             right: width / cw - 1,
@@ -165,11 +71,13 @@
         };
 
     init();
-    function init(images) {
+    function init() {
         canvas.width = width;
         canvas.height = height;
+        canvas.style.display = '';
         hud.width = 800; //width
         hud.height = 32;
+        hud.style.display = '';
         foods = [];
         weapons = [];
         bullits = [];
@@ -192,6 +100,8 @@
                     gameState.stop();
                     drawPause();
                 }
+            } else if (key === 27) {
+                destroy(true);
             }
             
             for (var i = players.length; i--;) {
@@ -232,11 +142,30 @@
         }
     }
 
+    function destroy(skip) {
+        function toMenu() {
+            canvas.style.display = 'none';
+            hud.style.display = 'none';
+            callback && callback();
+        }
+        clearInterval(pickip_loop);
+        gameState.stop();
+
+        if (skip) {
+            toMenu();
+        } else {
+            SneekMe.keyHandler = toMenu;
+        }        
+    }
+
     function gameOver(winner) {
+        destroy();
+
         var maxSnake = { value: 0, index: -1 },
             maxLife = { value: 0, index: -1 },
             foodCount = { value: 0, index: -1 },
-            shotsHit = { value: 0, index: -1, fired: 0 };
+            shotsHit = { value: 0, index: -1, fired: 0 },
+            respawns = { value: Infinity, index: -1 };
 
         for (var i = players.length; i--;) {
             var player = players[i];
@@ -261,19 +190,31 @@
                 shotsHit.value = player.shotsHit;
                 shotsHit.fired = player.shotsFired;
             }
+
+            if (player.respawns < respawns.value) {
+                respawns.index = i;
+                respawns.value = player.respawns;
+            }
         }
 
-        var stats = [];
-        stats.push('Winner: ' + players[winner].name);
-        ~maxSnake.index && stats.push('Longest snake: ' + maxSnake.value + ' ' + players[maxSnake.index].name);
-        ~maxLife.index && stats.push('Longest life: ' + ~~(maxLife.value / 1000) + 's ' + players[maxLife.index].name);
-        ~foodCount.index && stats.push('Most foods: ' + foodCount.value + ' ' + players[foodCount.index].name);
-        ~shotsHit.index && stats.push('Bullits hit: ' + shotsHit.value + ' of ' + shotsHit.fired +
-                        ' (' + (shotsHit.value / shotsHit.fired * 100).toFixed(2) + '%) ' + players[shotsHit.index].name);
-        log(stats.join('<br>'));
+        ctx.font = '24pt Calibri';
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = '#FFFFFF';
 
-        clearInterval(pickip_loop);
-        gameState.stop();
+        var x = 40,
+            y = 40,
+            drawStat = function (stat) {
+                ctx.fillText(stat, x, y);
+                y += 60;
+            };
+
+        drawStat(players[winner].name + ' is the winner!');
+        ~maxSnake.index && drawStat('Longest snake: ' + maxSnake.value + ' ' + players[maxSnake.index].name);
+        ~maxLife.index && drawStat('Longest life: ' + ~~(maxLife.value / 1000) + 's ' + players[maxLife.index].name);
+        ~foodCount.index && drawStat('Most foods: ' + foodCount.value + ' ' + players[foodCount.index].name);
+        ~shotsHit.index && drawStat('Bullits hit: ' + shotsHit.value + ' of ' + shotsHit.fired +
+                        ' (' + (shotsHit.value / shotsHit.fired * 100).toFixed(2) + '%) ' + players[shotsHit.index].name);
+        ~respawns.index && drawStat('Least respawns: ' + respawns.value + ' ' + players[respawns.index].name);
     }
 
     function findEmptyPos() {
@@ -627,6 +568,7 @@
 
             if (player.score >= MAX_SCORE) {
                 gameOver(player.id);
+                return;
             }
         }
 
@@ -841,7 +783,7 @@
         drawLevel();
         drawSnake();
 
-        if (SneekMe.keys[13]) drawDebug();
+        if (SneekMe.keys[8]) drawDebug();
     }
 
     function check_collision(x, y, array, splice) {

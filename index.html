@@ -11,22 +11,22 @@
 <body>
     <div id="output" style="position: absolute; top: 0; left: 0;"></div>
     <div class="center">
-        <canvas id="hud" class="hud"></canvas>
+        <canvas id="hud" class="hud" style="display: none;"></canvas>
         <canvas id="bg" class="bgcanvas"></canvas>
-        <canvas id="SneekMe" class="maincanvas"></canvas>
+        <canvas id="SneekMe" class="maincanvas" style="display: none;"></canvas>
 
-        <div id="tiles" class="hud" style="display:none;">
+        <div id="tiles" class="hud" style="display: none;">
             <div class="hudcontainer">
                 <div class="btnrow">
-                    <button class="btn" id="new">New</button>
-                    <button class="btn" id="load">Load</button>
-                    <button class="btn" id="save">Save</button>
-                    <button class="btn" id="share">Share</button>
+                    <button class="btn btn-small" id="new">New</button>
+                    <button class="btn btn-small" id="load">Load</button>
+                    <button class="btn btn-small" id="save">Save</button>
+                    <button class="btn btn-small" id="share">Share</button>
                 </div>
                 <div class="btnrow">
-                    <button class="btn" id="exit">Exit</button>
-                    <button class="btn" id="theme">Theme</button>
-                    <button class="btn" id="undo">Undo</button>
+                    <button class="btn btn-small" id="exit">Exit</button>
+                    <button class="btn btn-small" id="theme">Theme</button>
+                    <button class="btn btn-small" id="undo">Undo</button>
                 </div>
             </div>
             <div class="hudcontainer">
@@ -41,7 +41,16 @@
                 <div id="break" title="Breakable tile">&nbsp;</div>
             </div>
         </div>
-        <canvas id="Editor" class="maincanvas"></canvas>
+        <canvas id="Editor" class="maincanvas" style="display: none;"></canvas>
+
+        <div id="Menu">
+            <div class="wrap">
+                <button id="game" autofocus="autofocus">Game</button>
+                <button id="controls">Controls</button>
+                <button id="setup">Advanced setup</button>
+                <button id="leveleditor">Level editor</button>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->

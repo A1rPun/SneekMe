@@ -1,6 +1,17 @@
 ﻿(function () {
     //Default level
-    var level = SneekMe.debug;
+    var level = SneekMe.debug,
+        tiles = {
+            none: 0,
+            solid: 1,
+            breakable: 2,
+            food: 50,
+            goldfood: 55,
+            weapon: 22,
+            bullit: 66,
+            deadSnake: 88,
+            snake: 99
+        };
 
     function makeImages(images, callback) {
         var result = {},
@@ -145,8 +156,105 @@
         if (lvl) {
             level = lvl;
         }
-        
-        SneekMe.startGame(level, cw);
-        //SneekMe.editor(level, cw);
+        var menu = document.getElementById('Menu'),
+            callback = function () {
+                menu.style.display = '';
+                SneekMe.keyHandler = null;
+            };
+        document.getElementById('game').addEventListener('click', function () {
+            SneekMe.startGame(getPlayers(), level, tiles, cw, callback);
+            menu.style.display = 'none';
+        }, false);
+
+        document.getElementById('leveleditor').addEventListener('click', function () {
+            SneekMe.editor(level, tiles, cw, callback);
+            menu.style.display = 'none';
+        }, false);
+    }
+
+    function getPlayers() {
+        return [
+        /* */
+        new SneekMe.player({
+            id: 0,
+            name: 'Blue',
+            head: '#1E1959',
+            body: '#373276',
+            left: 37,
+            up: 38,
+            right: 39,
+            down: 40,
+            shoot: 16,
+            //isComputer: true
+        }),
+        /* */
+        new SneekMe.player({
+            id: 1,
+            name: 'Purple',
+            head: '#3B1255',
+            body: '#562A72',
+            left: 65,
+            up: 87,
+            right: 68,
+            down: 83,
+            shoot: 81,//Q
+            isComputer: true
+        }),
+        /* */
+        new SneekMe.player({
+            id: 2,
+            name: 'Red',
+            head: '#801515',
+            body: '#AA3939',
+            left: 74,
+            up: 73,
+            right: 76,
+            down: 75,
+            shoot: 76,
+            isComputer: true
+        }),
+        new SneekMe.player({
+            id: 3,
+            name: 'Yellow',
+            head: '#806815',
+            body: '#AA9139',
+            left: 100,
+            up: 104,
+            right: 102,
+            down: 101,
+            shoot: 96,
+            isComputer: true
+        }),
+        /* /
+        new SneekMe.player({
+            id: 4,
+            name: 'Green',
+            head: '#196811',
+            body: '#378B2E',
+            isComputer: true
+        }),
+        new SneekMe.player({
+            id: 5,
+            name: 'Teal',
+            head: '#0D4C4C',
+            body: '#226666',
+            isComputer: true
+        }),
+        new SneekMe.player({
+            id: 6,
+            name: 'Pink',
+            head: '#671140',
+            body: '#892D5F',
+            isComputer: true
+        }),
+        new SneekMe.player({
+            id: 7,
+            name: 'Grey',
+            head: '#333333',
+            body: '#707070',
+            isComputer: true
+        }),
+        /* */
+        ];
     }
 }());
