@@ -1,6 +1,6 @@
 ﻿(function () {
     //Default level
-    var level = SneekMe.debug,
+    var level,
         tiles = {
             none: 0,
             solid: 1,
@@ -57,8 +57,7 @@
                 sound.currentTime = 0;
             } catch (e) {
 
-            }
-            
+            }            
 
             if (loop) {
                 if (typeof sound.loop === 'boolean') {
@@ -74,9 +73,19 @@
         }
     };
     SneekMe.store = {
+        getItem: function (key) {
+            if (localStorage) {
+                var value = localStorage.getItem(key);
+                return value;
+            }
+        },
         get: function (key) {
             if (localStorage) {
                 var value = localStorage.getItem(key);
+                if (!value) return;
+                try {
+                    value = JSON.parse(value);
+                } catch (e) { }
                 return value;
             }
         },
@@ -99,10 +108,45 @@
             lvl = JSON.parse(lvl);
         } catch (e) { }
         //is valid level
-        if (Array.isArray(lvl) && lvl.length === level.length) {
+        if (Array.isArray(lvl) && lvl.length === 56) {
             //TODO: loop every row to check lengths
             return lvl;
         }
+    }
+    SneekMe.setControls = function () {
+        SneekMe.controls = SneekMe.store.get('controls') || SneekMe.getDefaultControls();
+    }
+    SneekMe.getDefaultControls = function () {
+        return {
+            A: {
+                left: 37,
+                up: 38,
+                right: 39,
+                down: 40,
+                shoot: 16,
+            },
+            B: {
+                left: 65,
+                up: 87,
+                right: 68,
+                down: 83,
+                shoot: 81,//Q
+            },
+            C: {
+                left: 74,
+                up: 73,
+                right: 76,
+                down: 75,
+                shoot: 76,
+            },
+            D: {
+                left: 100,
+                up: 104,
+                right: 102,
+                down: 101,
+                shoot: 96,
+            }
+        };
     }
 
     var bg = document.getElementById('bg'),
@@ -135,6 +179,8 @@
     });
 
     function init(images) {
+        level = SneekMe.loadLevel(SneekMe.difficulties);
+        SneekMe.setControls();
         SneekMe.keys = [];
         SneekMe.images = images;
         document.addEventListener('keydown', function (e) {
@@ -150,12 +196,12 @@
         bg.width = width;
         bg.height = height;
         bgctx.drawImage(images.bg, 0, 0, width, height);
-
-        var lvl = SneekMe.loadLevel(SneekMe.store.get('level'));
+        /*
+        var lvl = SneekMe.loadLevel(SneekMe.store.getItem('level'));
 
         if (lvl) {
             level = lvl;
-        }
+        }*/
         var menu = document.getElementById('Menu'),
             callback = function () {
                 menu.style.display = '';
@@ -166,6 +212,11 @@
             menu.style.display = 'none';
         }, false);
 
+        document.getElementById('setupcontrols').addEventListener('click', function () {
+            SneekMe.setupcontrols(callback);
+            menu.style.display = 'none';
+        }, false);
+
         document.getElementById('leveleditor').addEventListener('click', function () {
             SneekMe.editor(level, tiles, cw, callback);
             menu.style.display = 'none';
@@ -173,6 +224,7 @@
     }
 
     function getPlayers() {
+        var controls = SneekMe.controls;
         return [
         /* */
         new SneekMe.player({
@@ -180,11 +232,8 @@
             name: 'Blue',
             head: '#1E1959',
             body: '#373276',
-            left: 37,
-            up: 38,
-            right: 39,
-            down: 40,
-            shoot: 16,
+            controls: controls.A,
+            //relative: true
             //isComputer: true
         }),
         /* */
@@ -193,24 +242,16 @@
             name: 'Purple',
             head: '#3B1255',
             body: '#562A72',
-            left: 65,
-            up: 87,
-            right: 68,
-            down: 83,
-            shoot: 81,//Q
-            isComputer: true
+            controls: controls.B,
+            //isComputer: true
         }),
-        /* */
+        /* /
         new SneekMe.player({
             id: 2,
             name: 'Red',
             head: '#801515',
             body: '#AA3939',
-            left: 74,
-            up: 73,
-            right: 76,
-            down: 75,
-            shoot: 76,
+            controls: controls.C,
             isComputer: true
         }),
         new SneekMe.player({
@@ -218,11 +259,7 @@
             name: 'Yellow',
             head: '#806815',
             body: '#AA9139',
-            left: 100,
-            up: 104,
-            right: 102,
-            down: 101,
-            shoot: 96,
+            controls: controls.D,
             isComputer: true
         }),
         /* /

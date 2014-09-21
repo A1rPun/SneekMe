@@ -36,7 +36,7 @@
         //Number of meal
         MAX_FOODS = 10,
         //Number of weapons
-        MAX_WEAPONS = 5,
+        MAX_WEAPONS = 10,
         MAX_SHOTS = 10,
         //Increase snake length
         ADD_TAILS = 5,
@@ -52,11 +52,12 @@
         //Point got when a snake crashes on you
         ADD_BUMP_SCORE = 3,        
         //Point lost when crashed
-        RESPAWN_PENALTY = 3,
+        RESPAWN_PENALTY = 1,//3,
         //Point lost when hit
         HIT_PENALTY = 1,
         //PICKUP_INTERVAL
         PICKUP_INTERVAL = 2000,
+        DEADSNAKE_INTERVAL = 8000,
         GOLD_CHANCE = 2,//of 100
         pickip_loop,
         foods,
@@ -106,18 +107,18 @@
             
             for (var i = players.length; i--;) {
                 var player = players[i];
-                if (player.isComputer) continue;
+                if (player.isComputer || !player.move) continue;
 
-                if (key === player.left) {
+                if (key === player.controls.left) {
                     player.directions.push(3);//left
-                } else if (key === player.up) {
+                } else if (key === player.controls.up) {
                     player.directions.push(0);//up
-                } else if (key === player.right) {
+                } else if (key === player.controls.right) {
                     player.directions.push(1);//right
-                } else if (key === player.down) {
+                } else if (key === player.controls.down) {
                     player.directions.push(2);//down
-                } else if (key === player.shoot && player.shots) {
-                    shoot(player);
+                } else if (key === player.controls.shoot && player.shots) {
+                    player.shoot = true;
                 }
             }
         }
@@ -154,7 +155,11 @@
         if (skip) {
             toMenu();
         } else {
-            SneekMe.keyHandler = toMenu;
+            SneekMe.keyHandler = null;
+
+            setTimeout(function () {
+                SneekMe.keyHandler = toMenu;
+            }, 1000);
         }        
     }
 
@@ -342,37 +347,9 @@
                 }
             }
         }
-        
-        if (player.shots && rand(100) > 98) {
-            shoot(player);
-        }
-    }
 
-    function moveHuman(player) {
-        if (player.directions.length) {
-            var d = player.direction,
-                newDirection = -1;
-
-            if (d === -1)
-                SneekMe.playSound('start');
-
-            while (newDirection === -1 && player.directions.length) {
-                var dir = player.directions.shift();
-
-                if (dir === 3 && d !== 3 && d !== 1) {
-                    newDirection = 3;//left
-                } else if (dir === 0 && d !== 0 && d !== 2) {
-                    newDirection = 0;//up
-                } else if (dir === 1 && d !== 1 && d !== 3) {
-                    newDirection = 1;//right
-                } else if (dir === 2 && d !== 2 && d !== 0) {
-                    newDirection = 2;//down
-                }
-            }
-
-            if (~newDirection) {
-                player.direction = newDirection;
-            }
+        if (player.shots && rand(100) > 95) {
+            player.shoot = true;
         }
     }
 
@@ -396,10 +373,22 @@
             one.direction = 0;
             two.direction = 2;
         }
-        bullits.push(one, two);
+        /*
+        var od = calculateDirection(x, y, one.direction),
+            td = calculateDirection(x, y, two.direction);
+
+        one.x = od[0];
+        one.y = od[1];
+        two.x = td[0];
+        two.y = td[1];
+        */        
         player.shotsFired += 2;
-        SneekMe.playSound('shoot');
+        player.shoot = false;
+        SneekMe.playSound('shoot');        
         drawHud();
+        bullits.unshift(one, two);
+        plotBullit(two, 1);
+        plotBullit(one, 0);
     }
 
     function createDeadSnake(snake) {
@@ -411,70 +400,77 @@
                 if (level[snake[j].y][snake[j].x] === tiles.deadSnake)
                     level[snake[j].y][snake[j].x] = tiles.none;
             }
-        }, 10000);
+        }, DEADSNAKE_INTERVAL);
     }
 
     function plotBullits() {
-        //TODO: fix boundary issue when level has no border
         for (var i = bullits.length; i--;) {
-            var bullit = bullits[i];
+            plotBullit(bullits[i], i);
+        }
+    }
 
-            if (bullit.distance)
+    function plotBullit(bullit, i) {        
+        if (bullit.distance)
+            level[bullit.y][bullit.x] = tiles.none;
+
+        var dir = calculateDirection(bullit.x, bullit.y, bullit.direction);
+        bullit.x = dir[0];
+        bullit.y = dir[1];
+
+        if (bullit.x < bounds.left ||
+            bullit.x > bounds.right ||
+            bullit.y < bounds.top ||
+            bullit.y > bounds.bottom) {
+            bullits.splice(i, 1);
+            return;
+        }
+
+        var tile = level[bullit.y][bullit.x];
+        if (acceptable.indexOf(tile) === -1) {
+
+            if (tile === tiles.snake) {
+                bullitCollision(bullit);
+            } else if (tile === tiles.breakable || tile === tiles.deadSnake) {
+                players[bullit.owner].shotsHit++;
                 level[bullit.y][bullit.x] = tiles.none;
-
-            var dir = calculateDirection(bullit.x, bullit.y, bullit.direction);
-            bullit.x = dir[0];
-            bullit.y = dir[1];
-
-            if (bullit.x < bounds.left ||
-                bullit.x > bounds.right ||
-                bullit.y < bounds.top ||
-                bullit.y > bounds.bottom) {
-                continue;
             }
+            bullits.splice(i, 1);
+            return;
+        }
+        level[bullit.y][bullit.x] = tiles.bullit;
+        bullit.distance++;
+    }
 
-            var tile = level[bullit.y][bullit.x];
-            if (acceptable.indexOf(tile) === -1) {
+    function bullitCollision(bullit){
+        for (var j = players.length; j--;) {
+            var player = players[j],
+                index = check_collision(bullit.x, bullit.y, player.snake);
 
-                if (tile === tiles.snake) {
-                    for (var j = players.length; j--;) {
-                        var player = players[j],
-                            index = check_collision(bullit.x, bullit.y, player.snake);
+            if (~index && ~player.direction) {
 
-                        if (~index) {
-
-                            if (players[bullit.owner].id !== player.id) {
-                                players[bullit.owner].shotsHit++;
-                                players[bullit.owner].score += ADD_HIT_SCORE;
-                            }
-
-                            //index hit the head or 2nd index
-                            if (index < 2) {
-                                respawn(player);
-                            } else {
-                                SneekMe.playSound('hit');
-                                var snake = player.snake;
-                                player.snake = snake.slice(0, index);
-                                createDeadSnake(snake.slice(index, snake.length));
-                                player.score -= HIT_PENALTY;//hit on head also hit penalty? if yes move this above IF statement
-                                drawHud();
-                            }
-                            break;
-                        }
-                    }
-                } else if (tile === tiles.breakable || tile === tiles.deadSnake) {
+                if (players[bullit.owner].id !== player.id) {
                     players[bullit.owner].shotsHit++;
-                    level[bullit.y][bullit.x] = tiles.none;
+                    players[bullit.owner].score += ADD_HIT_SCORE;
                 }
-                bullits.splice(i, 1);
-                continue;
+
+                //index hit the head or 2nd index
+                if (index < 2) {
+                    respawn(player);
+                } else {
+                    SneekMe.playSound('hit');
+                    var snake = player.snake;
+                    player.snake = snake.slice(0, index);
+                    createDeadSnake(snake.slice(index, snake.length));//leaves a 
+                    player.score -= HIT_PENALTY;//hit on head also hit penalty? if yes move this above IF statement
+                    drawHud();
+                }
+                break;
             }
-            level[bullit.y][bullit.x] = tiles.bullit;
-            bullit.distance++;
         }
     }
 
     function update() {
+        plotBullits();
         for (var i = players.length; i--;) {
             var player = players[i];
 
@@ -483,15 +479,15 @@
             if (player.isComputer) {
                 moveComputer(player);
             } else {
-                moveHuman(player);
+                player.move && player.move();
             }
 
             var d = player.direction,
                 nx = player.snake[0].x,
                 ny = player.snake[0].y;
-
-            if (d === -1) continue;
-
+//                                                                 (\_
+            if (d === -1) continue;//If not moving you can't win v(^_^)v
+//                                                               |_|  ||
             var dir = calculateDirection(nx, ny, d);
             nx = dir[0];
             ny = dir[1];
@@ -563,7 +559,10 @@
             }
 
             level[tail.y][tail.x] = tiles.snake;
-            player.snake.unshift(tail); //puts back the tail as the first cell          
+            player.snake.unshift(tail); //puts back the tail as the first cell     
+            
+            if(player.shoot) shoot(player);
+
             player.registerStats();
 
             if (player.score >= MAX_SCORE) {
@@ -571,8 +570,6 @@
                 return;
             }
         }
-
-        plotBullits();
         paint();
     }
 
@@ -602,10 +599,10 @@
                         //ctx.fillStyle = '#0000FF';
                         ctx.drawImage(SneekMe.images.weapon, j * cw, i * cw, cw, cw);
                         break;
-                    case tiles.bullit:
-                        ctx.fillStyle = '#FF0000';
-                        ctx.fillRect(j * cw, i * cw, cw, cw);
-                        break;
+                    //case tiles.bullit:
+                    //    ctx.fillStyle = '#FF0000';
+                    //    ctx.fillRect(j * cw, i * cw, cw, cw);
+                    //    break;
                     case tiles.deadSnake:
                         ctx.fillStyle = '#666666';
                         ctx.fillRect(j * cw, i * cw, cw, cw);
@@ -613,6 +610,42 @@
                     default:
                 }
             }
+        }
+    }
+
+    function drawTriangle(x, y, direction, stroke) {
+        ctx.beginPath();
+
+        if (direction === 0) {
+            //up
+            ctx.moveTo(x + mid, y);
+            ctx.lineTo(x + cw, y + cw);
+            ctx.lineTo(x, y + cw);
+            ctx.lineTo(x + mid, y);
+        } else if (direction === 1) {
+            //right
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + cw, y + mid);
+            ctx.lineTo(x, y + cw);
+            ctx.lineTo(x, y);
+        } else if (direction === 2) {
+            //down
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + cw, y);
+            ctx.lineTo(x + mid, y + cw);
+            ctx.lineTo(x, y);
+        } else {
+            //left
+            ctx.moveTo(x + cw, y);
+            ctx.lineTo(x + cw, y + cw);
+            ctx.lineTo(x, y + mid);
+            ctx.lineTo(x + cw, y);
+        }
+        ctx.fill();
+
+        if (stroke) {
+            ctx.strokeStyle = stroke;
+            ctx.stroke();
         }
     }
 
@@ -641,7 +674,7 @@
             if (player.direction === -1) {
                 ctx.strokeStyle = player.head;
                 ctx.beginPath();
-                ctx.arc(x + mid, y + mid, cw + cw, 0, 2 * Math.PI, false);
+                ctx.arc(x + mid, y + mid, cw, 0, 2 * Math.PI, false);
                 ctx.stroke();
             }
 
@@ -652,36 +685,13 @@
                     ctx.fillRect(player.snake[j].x * cw, player.snake[j].y * cw, cw, cw);
                 }
 
-                //Draw last body
+                //Draw last body in a triangle shape
                 var l = player.snake[lastIndex],
-                    ld = findDirection(l.x, l.y, player.snake[lastIndex - 1].x, player.snake[lastIndex - 1].y),
+                    ld = findDirection(player.snake[lastIndex - 1].x, player.snake[lastIndex - 1].y, l.x, l.y),
                     lx = l.x * cw,
                     ly = l.y * cw;
 
-                ctx.beginPath();
-
-                if (ld === 0) {
-                    //down
-                    ctx.moveTo(lx, ly);
-                    ctx.lineTo(lx + cw, ly);
-                    ctx.lineTo(lx + mid, ly + cw);
-                } else if(ld === 1){
-                    //left
-                    ctx.moveTo(lx + cw, ly);
-                    ctx.lineTo(lx + cw, ly + cw);
-                    ctx.lineTo(lx, ly + mid);
-                } else if (ld === 2) {
-                    //up
-                    ctx.moveTo(lx + mid, ly);
-                    ctx.lineTo(lx + cw, ly + cw);
-                    ctx.lineTo(lx, ly + cw);
-                } else {
-                    //right
-                    ctx.moveTo(lx, ly);
-                    ctx.lineTo(lx + cw, ly + mid);
-                    ctx.lineTo(lx, ly + cw);                        
-                }
-                ctx.fill();
+                drawTriangle(lx, ly, ld);
             }
         }
 
@@ -699,6 +709,14 @@
             } else {                
                 ctx.drawImage(SneekMe.images.crown, crownPos[0] * cw, crownPos[1] * cw);
             }
+        }
+    }
+
+    function drawBullits() {
+        for (var i = bullits.length; i--;) {
+            var bullit = bullits[i];
+            ctx.fillStyle = players[bullit.owner].body;
+            drawTriangle(bullit.x * cw, bullit.y * cw, bullit.direction, players[bullit.owner].head);
         }
     }
 
@@ -782,6 +800,7 @@
     function paint() {
         drawLevel();
         drawSnake();
+        drawBullits();
 
         if (SneekMe.keys[8]) drawDebug();
     }

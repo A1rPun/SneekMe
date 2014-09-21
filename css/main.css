@@ -34,13 +34,20 @@ body {
   width: 60%;
   padding-top: 10%;
 }
-#Menu {
+.container {
   width: 800px;
   height: 592px;
   background: #000000 url('../img/sunset.jpg') no-repeat;
   background-size: cover;
   position: absolute;
   z-index: 3;
+}
+#Controls > table {
+  width: 100%;
+  border: none;
+}
+#Controls > table th {
+  width: 20%;
 }
 #Menu button {
   border: none;

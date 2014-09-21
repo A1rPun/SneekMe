@@ -1,12 +1,15 @@
 ﻿SneekMe.player = (function () {
-    var DEFAULT_SNAKE_LENGTH = 9;//+1 head
+    var DEFAULT_SNAKE_LENGTH = 9,//+1 head
+        START_DELAY = 500;
     // constructor
     function player(options) {
+        //Default properties that can be overridden
+        this.name = 'Player';
+        this.relative = false;
+
         if (arguments[0]) for (var prop in arguments[0]) this[prop] = arguments[0][prop];
 
-        if (!this.name) {
-            this.name = 'Player';
-        }
+        //Default properties that can't be overridden
         this.score = 0;
         this.maxSnake = 0;
         this.maxLife = 0;
@@ -32,20 +35,102 @@
             }
         },
         respawn: function () {
-            this.respawns++;
-            this.registerStats();            
-            this.tails = DEFAULT_SNAKE_LENGTH;
-            this.shots = 0;
-            this.life = +new Date();
+            var me = this;
+            me.registerStats();            
+            me.tails = DEFAULT_SNAKE_LENGTH;
+            me.shots = 0;
+            me.shoot = false;
+            me.life = +new Date();
+            me.move = null;
 
-            if (this.isComputer) {
-                this.path = [];
-                this.count = 0;
-                this.autoPilot = false;
-                this.direction = 1;//random?
+            setTimeout(function () {
+                me.move = me.moveStart;
+            }, START_DELAY);
+            
+
+            if (me.isComputer) {
+                me.path = [];
+                me.count = 0;
+                me.autoPilot = false;
+                me.direction = 1;//random?
             } else {
-                this.direction = -1;
-                this.directions = [];
+                me.direction = -1;
+                me.directions = [];
+            }
+        },
+        move: null,
+        moveStart: function () {
+            if (this.directions.length) {
+                var d = this.direction,
+                    newDirection = -1;
+
+                SneekMe.playSound('start');
+                this.respawns++;
+
+                while (newDirection === -1 && this.directions.length) {
+                    var dir = this.directions.shift();
+
+                    if (dir === 3 && d !== 3 && d !== 1) {
+                        newDirection = 3;//left
+                    } else if (dir === 0 && d !== 0 && d !== 2) {
+                        newDirection = 0;//up
+                    } else if (dir === 1 && d !== 1 && d !== 3) {
+                        newDirection = 1;//right
+                    } else if (dir === 2 && d !== 2 && d !== 0) {
+                        newDirection = 2;//down
+                    }
+                }
+
+                if (~newDirection) {
+                    this.direction = newDirection;
+                    this.move = this.relative ? this.moveRelative : this.moveAbsolute;
+                }
+            }
+        },
+        moveAbsolute: function () {
+            if (this.directions.length) {
+                var d = this.direction,
+                    newDirection = -1;
+
+                while (newDirection === -1 && this.directions.length) {
+                    var dir = this.directions.shift();
+
+                    if (dir === 3 && d !== 3 && d !== 1) {
+                        newDirection = 3;//left
+                    } else if (dir === 0 && d !== 0 && d !== 2) {
+                        newDirection = 0;//up
+                    } else if (dir === 1 && d !== 1 && d !== 3) {
+                        newDirection = 1;//right
+                    } else if (dir === 2 && d !== 2 && d !== 0) {
+                        newDirection = 2;//down
+                    }
+                }
+
+                if (~newDirection) {
+                    this.direction = newDirection;
+                }
+            }
+        },
+        moveRelative: function () {
+            if (this.directions.length) {
+                var d = this.direction,
+                    newDirection = -1;
+
+                while (newDirection === -1 && this.directions.length) {
+                    var dir = this.directions.shift();
+
+                    if (dir === 3) {
+                        newDirection = d-1;//left
+                        if (newDirection < 0) newDirection = 3;
+                    } else if (dir === 1) {
+                        newDirection = d+1;//right
+                        if (newDirection > 3) newDirection = 0;
+                    }
+                }
+
+                if (~newDirection) {
+                    this.direction = newDirection;
+                }
             }
         }
     };

@@ -43,10 +43,64 @@
         </div>
         <canvas id="Editor" class="maincanvas" style="display: none;"></canvas>
 
-        <div id="Menu">
+        <div class="container" id="Controls" style="display: none;">
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Scheme A</th>
+                        <th>Scheme B</th>
+                        <th>Scheme C</th>
+                        <th>Scheme D</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Left</td>
+                        <td><input type="text" name="A.left" /></td>
+                        <td><input type="text" name="B.left" /></td>
+                        <td><input type="text" name="C.left" /></td>
+                        <td><input type="text" name="D.left" /></td>
+                    </tr>
+                                       <tr>
+                        <td>Right</td>
+                        <td><input type="text" name="A.right" /></td>
+                        <td><input type="text" name="B.right" /></td>
+                        <td><input type="text" name="C.right" /></td>
+                        <td><input type="text" name="D.right" /></td>
+                    </tr>
+                                       <tr>
+                        <td>Up</td>
+                        <td><input type="text" name="A.up" /></td>
+                        <td><input type="text" name="B.up" /></td>
+                        <td><input type="text" name="C.up" /></td>
+                        <td><input type="text" name="D.up" /></td>
+                    </tr>
+                                       <tr>
+                        <td>Down</td>
+                        <td><input type="text" name="A.down" /></td>
+                        <td><input type="text" name="B.down" /></td>
+                        <td><input type="text" name="C.down" /></td>
+                        <td><input type="text" name="D.down" /></td>
+                    </tr>
+                                       <tr>
+                        <td>Shoot</td>
+                        <td><input type="text" name="A.shoot" /></td>
+                        <td><input type="text" name="B.shoot" /></td>
+                        <td><input type="text" name="C.shoot" /></td>
+                        <td><input type="text" name="D.shoot" /></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button id="cancelcontrols">Cancel</button>
+            <button id="defaultcontrols">Default</button>
+            <button id="savecontrols">Save</button>
+        </div>
+
+        <div class="container" id="Menu">
             <div class="wrap">
-                <button id="game" autofocus="autofocus">Game</button>
-                <button id="controls">Controls</button>
+                <button id="game">Game</button>
+                <button id="setupcontrols">Controls</button>
                 <button id="setup">Advanced setup</button>
                 <button id="leveleditor">Level editor</button>
             </div>
@@ -61,6 +115,7 @@
     <script src="js/gameState.js"></script>
     <script src="js/player.js"></script>
     <script src="js/game.js"></script>
+    <script src="js/controls.js"></script>
     <script src="js/editor.js"></script>
     <script src="js/main.js"></script>
 </body>
