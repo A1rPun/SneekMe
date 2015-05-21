@@ -25,8 +25,7 @@ SneekMe.astar = (function () {
             // it must have equal height and width. If your game world is rectangular, 
             // just fill the array with dummy values to pad the empty space.
             this.worldHeight = level.length;
-            this.worldWidth = level[0].length;
-            
+            this.worldWidth = level[0].length;            
             this.worldSize = this.worldHeight * this.worldWidth;
         },
 
