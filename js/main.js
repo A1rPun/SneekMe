@@ -196,12 +196,12 @@
         bg.width = width;
         bg.height = height;
         bgctx.drawImage(images.bg, 0, 0, width, height);
-        /*
+        
         var lvl = SneekMe.loadLevel(SneekMe.store.getItem('level'));
 
         if (lvl) {
             level = lvl;
-        }*/
+        }
         var menu = document.getElementById('Menu'),
             callback = function () {
                 menu.style.display = '';
@@ -234,7 +234,7 @@
             body: '#373276',
             controls: controls.A,
             //relative: true
-            //isComputer: true
+            isComputer: true
         }),
         /* */
         new SneekMe.player({
@@ -243,7 +243,7 @@
             head: '#3B1255',
             body: '#562A72',
             controls: controls.B,
-            //isComputer: true
+            isComputer: true
         }),
         /* /
         new SneekMe.player({

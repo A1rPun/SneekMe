@@ -20,19 +20,14 @@ SneekMe.astar = (function () {
         },
         setGrid: function (level) {
             this.grid = level;
-
             // keep track of the world dimensions
             // Note that this A-star implementation expects the world array to be square: 
             // it must have equal height and width. If your game world is rectangular, 
             // just fill the array with dummy values to pad the empty space.
-            var worldWidth = level[0].length;
-            var worldHeight = level.length;
-            //var worldSize = worldWidth * worldHeight;
-            var worldSize = max(worldWidth, worldHeight) * max(worldWidth, worldHeight);// ??to fix it? or break it?
-
-            this.worldHeight = worldWidth;
-            this.worldWidth = worldHeight;
-            this.worldSize = worldSize;
+            this.worldHeight = level.length;
+            this.worldWidth = level[0].length;
+            
+            this.worldSize = this.worldHeight * this.worldWidth;
         },
 
         // distanceFunction functions
@@ -120,7 +115,8 @@ SneekMe.astar = (function () {
 
         // returns boolean value (world cell is available and open)
         canWalkHere: function (x, y) {
-            return this.acceptableTiles.indexOf(this.grid[y][x]) !== -1;
+            return this.grid && this.grid[y] &&
+				   this.acceptableTiles.indexOf(this.grid[y][x]) !== -1;
         },
 
         //TODO: fix findpath when pathend is on 0,0 -- actual bug?
