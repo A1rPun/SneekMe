@@ -10,8 +10,12 @@ SneekMe.metaGame = function (tiles, cw, callback) {
 
     init();
     function init() {
-        container.style.display = '';
+        var lvl = SneekMe.loadLevel(SneekMe.store.getItem('level'));
+        if (lvl) {
+            level = lvl;
+        }
 
+        container.style.display = '';
         canvas.width = width;
         canvas.height = height;
         drawLevel();
@@ -23,7 +27,7 @@ SneekMe.metaGame = function (tiles, cw, callback) {
         document.getElementById('playgame').addEventListener('click', function () {
             destroy();
             SneekMe.startGame(getPlayers(), level, tiles, cw, callback);
-        }, false);        
+        }, false);
     }
 
     function destroy() {

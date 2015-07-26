@@ -195,13 +195,7 @@
         bg.width = width;
         bg.height = height;
         bgctx.drawImage(images.bg, 0, 0, width, height);
-        /*
-        //SneekMe.levels = {} !! TODO
-        var lvl = SneekMe.loadLevel(SneekMe.store.getItem('level'));
 
-        if (lvl) {
-            level = lvl;
-        }*/
         var menu = document.getElementById('Menu'),
             callback = function () {
                 menu.style.display = '';
