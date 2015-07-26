@@ -13,8 +13,8 @@ body{
 }
 
 .center{
-    width: @canvasWidth;
     margin: 0 auto;
+    max-width: @canvasWidth;
 }
 
 @hudheight: 32px;
@@ -40,7 +40,7 @@ body{
     z-index:2;
 }
 
-.wrap{
+.menuwrap{
     margin: 0 auto;
     width: 60%;
     padding-top:10%;
@@ -57,7 +57,7 @@ body{
 }
 
 #Controls {
-    & > table{
+    & table{
         width: 100%;
         border: none;
 
@@ -87,6 +87,14 @@ body{
     height: @hudheight;
     width: @canvasWidth;
     background-color: #000;
+}
+
+#Game{
+
+}
+
+.row{
+    width: 100%;
 }
 
 .hudcontainer{

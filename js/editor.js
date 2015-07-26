@@ -1,4 +1,5 @@
-﻿SneekMe.editor = function (level, tiles, cw, callback) {
+﻿SneekMe.editor = function (tiles, cw, callback) {
+    var level = SneekMe.loadLevel(SneekMe.blank);
     function rand(num) {
         return Math.floor(Math.random() * num);
     }
@@ -173,11 +174,7 @@
         tile.className = 'tile-active';
     }
     function newLevel() {
-        for (var i = level.length; i--;) {
-            for (var j = level[0].length; j--;) {
-                level[i][j] = tiles.none;
-            }
-        }
+        level = SneekMe.loadLevel(SneekMe.blank);
         drawLevel();
     }
     function loadLevel() {

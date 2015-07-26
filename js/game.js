@@ -196,7 +196,7 @@
                 shotsHit.fired = player.shotsFired;
             }
 
-            if (player.respawns < respawns.value) {
+            if (player.respawns < respawns.value && player.respawns > -1) {
                 respawns.index = i;
                 respawns.value = player.respawns;
             }

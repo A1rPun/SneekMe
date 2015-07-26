@@ -1,7 +1,6 @@
 ﻿(function () {
     //Default level
-    var level,
-        tiles = {
+    var tiles = {
             none: 0,
             solid: 1,
             breakable: 2,
@@ -99,7 +98,7 @@
 
     SneekMe.saveLevel = function (lvl) {
         SneekMe.store.set('level', lvl);
-    }
+    };
 
     SneekMe.loadLevel = function (lvl) {
         if (!lvl) return;
@@ -112,10 +111,10 @@
             //TODO: loop every row to check lengths
             return lvl;
         }
-    }
+    };
     SneekMe.setControls = function () {
         SneekMe.controls = SneekMe.store.get('controls') || SneekMe.getDefaultControls();
-    }
+    };
     SneekMe.getDefaultControls = function () {
         return {
             A: {
@@ -147,7 +146,7 @@
                 shoot: 96,
             }
         };
-    }
+    };
 
     var bg = document.getElementById('bg'),
         bgctx = bg.getContext("2d"),
@@ -179,7 +178,7 @@
     });
 
     function init(images) {
-        level = SneekMe.loadLevel(SneekMe.difficulties);
+        
         SneekMe.setControls();
         SneekMe.keys = [];
         SneekMe.images = images;
@@ -197,6 +196,7 @@
         bg.height = height;
         bgctx.drawImage(images.bg, 0, 0, width, height);
         /*
+        //SneekMe.levels = {} !! TODO
         var lvl = SneekMe.loadLevel(SneekMe.store.getItem('level'));
 
         if (lvl) {
@@ -207,8 +207,8 @@
                 menu.style.display = '';
                 SneekMe.keyHandler = null;
             };
-        document.getElementById('game').addEventListener('click', function () {
-            SneekMe.startGame(getPlayers(), level, tiles, cw, callback);
+        document.getElementById('setupgame').addEventListener('click', function () {
+            SneekMe.metaGame(tiles, cw, callback);
             menu.style.display = 'none';
         }, false);
 
@@ -218,80 +218,8 @@
         }, false);
 
         document.getElementById('leveleditor').addEventListener('click', function () {
-            SneekMe.editor(level, tiles, cw, callback);
+            SneekMe.editor(tiles, cw, callback);
             menu.style.display = 'none';
         }, false);
-    }
-
-    function getPlayers() {
-        var controls = SneekMe.controls;
-        return [
-        /* */
-        new SneekMe.player({
-            id: 0,
-            name: 'Blue',
-            head: '#1E1959',
-            body: '#373276',
-            controls: controls.A,
-            //relative: true
-            //isComputer: true
-        }),
-        /* */
-        new SneekMe.player({
-            id: 1,
-            name: 'Purple',
-            head: '#3B1255',
-            body: '#562A72',
-            controls: controls.B,
-            //isComputer: true
-        }),
-        /* /
-        new SneekMe.player({
-            id: 2,
-            name: 'Red',
-            head: '#801515',
-            body: '#AA3939',
-            controls: controls.C,
-            isComputer: true
-        }),
-        new SneekMe.player({
-            id: 3,
-            name: 'Yellow',
-            head: '#806815',
-            body: '#AA9139',
-            controls: controls.D,
-            isComputer: true
-        }),
-        /* /
-        new SneekMe.player({
-            id: 4,
-            name: 'Green',
-            head: '#196811',
-            body: '#378B2E',
-            isComputer: true
-        }),
-        new SneekMe.player({
-            id: 5,
-            name: 'Teal',
-            head: '#0D4C4C',
-            body: '#226666',
-            isComputer: true
-        }),
-        new SneekMe.player({
-            id: 6,
-            name: 'Pink',
-            head: '#671140',
-            body: '#892D5F',
-            isComputer: true
-        }),
-        new SneekMe.player({
-            id: 7,
-            name: 'Grey',
-            head: '#333333',
-            body: '#707070',
-            isComputer: true
-        }),
-        /* */
-        ];
     }
 }());
