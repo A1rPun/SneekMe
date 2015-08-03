@@ -1,4 +1,4 @@
-﻿SneekMe.startGame = function (players, level, tiles, cw, callback) {
+﻿SneekMe.startGame = function (players, level, tiles, colors, cw, callback) {
     function rand(num) {
         return Math.floor(Math.random() * num);
     }
@@ -717,7 +717,8 @@
 
             var x = player.snake[0].x * cw,
                 y = player.snake[0].y * cw,
-                lastIndex = player.snake.length - 1;
+                lastIndex = player.snake.length - 1,
+                color = colors[player.color];
 
             if (player.score > crown.value) {
                 crown.index = i;
@@ -728,29 +729,32 @@
             }
 
             //paint head of snake
-            ctx.fillStyle = player.head;
+            var headColor = color.head ? color.head : color.getColor();
+            ctx.fillStyle = headColor;
             ctx.fillRect(x, y, cw, cw);
-
+            //When respawned, draw an outline
             if (player.direction === -1) {
-                ctx.strokeStyle = player.head;
+                ctx.strokeStyle = headColor;
                 ctx.beginPath();
                 ctx.arc(x + mid, y + mid, cw, 0, 2 * Math.PI, false);
                 ctx.stroke();
             }
 
-            if (lastIndex > 0) {                    
+            if (lastIndex > 0) {
                 //paint body of snake
-                ctx.fillStyle = player.body;
+                if (color.body)
+                    ctx.fillStyle = color.body;
+
                 for (var j = 1; j < lastIndex; j++) {
+                    if (!color.body)
+                        ctx.fillStyle = color.getColor(j, lastIndex);
                     ctx.fillRect(player.snake[j].x * cw, player.snake[j].y * cw, cw, cw);
                 }
-
                 //Draw last body in a triangle shape
                 var l = player.snake[lastIndex],
                     ld = findDirection(player.snake[lastIndex - 1].x, player.snake[lastIndex - 1].y, l.x, l.y),
                     lx = l.x * cw,
                     ly = l.y * cw;
-
                 drawTriangle(lx, ly, ld);
             }
         }
@@ -793,12 +797,13 @@
             var player = players[i],
                 x = 5 + maxWidth * (i % 4),
                 y = i < 4 ? 6 : 18,
+                color = colors[player.color],
                 offset = 8;
             //Draw snake
-            hudctx.fillStyle = player.head;
+            hudctx.fillStyle = color.head ? color.head : color.getColor();
             hudctx.fillRect(x, y, cw, cw);
 
-            hudctx.fillStyle = player.body;
+            hudctx.fillStyle = color.body ? color.body : color.getColor();
             hudctx.fillRect(x + cw, y, cw, cw);
             hudctx.fillRect(x + cw * 2, y, cw, cw);
 
@@ -836,9 +841,10 @@
         for (var i = players.length; i--;) {
             var p = players[i].path;
             if (p && p.length) {
-                var count = players[i].pathCount;
+                var count = players[i].pathCount,
+                    color = colors[players[i].color];
                 if (!p[count]) continue;
-                ctx.strokeStyle = players[i].body;
+                ctx.strokeStyle = color.head ? color.head : color.getColor();
                 ctx.beginPath();
                 ctx.moveTo(p[count][0] * cw + mid, p[count][1] * cw + mid);
                 for (var j = count, l = p.length; j < l; j++) {

@@ -1,5 +1,5 @@
 ﻿//
-SneekMe.metaGame = function (tiles, cw, callback) {
+SneekMe.metaGame = function (tiles, colors, cw, callback) {
     var container = document.getElementById('Game'),
         canvas = document.getElementById('picklevel'),
         ctx = canvas.getContext("2d"),
@@ -26,7 +26,7 @@ SneekMe.metaGame = function (tiles, cw, callback) {
         }, false);
         document.getElementById('playgame').addEventListener('click', function () {
             destroy();
-            SneekMe.startGame(getPlayers(), level, tiles, cw, callback);
+            SneekMe.startGame(getPlayers(), level, tiles, colors, cw, callback);
         }, false);
     }
 
@@ -65,68 +65,73 @@ SneekMe.metaGame = function (tiles, cw, callback) {
         /* */
         new SneekMe.player({
             id: 0,
-            name: 'Blue',
-            head: '#1E1959',
-            body: '#373276',
+            name: 'Player 1',
+            color: 0,
             controls: controls.A,
             //relative: true
-            //isComputer: true
+            isComputer: true
         }),
         /* */
         new SneekMe.player({
             id: 1,
-            name: 'Purple',
-            head: '#3B1255',
-            body: '#562A72',
+            name: 'Player 2',
+            color: 1,
             controls: controls.B,
             isComputer: true
         }),
-        /* /
+        /* */
         new SneekMe.player({
             id: 2,
-            name: 'Red',
-            head: '#801515',
-            body: '#AA3939',
+            name: 'Player 3',
+            color: 2,
             controls: controls.C,
             isComputer: true
         }),
         new SneekMe.player({
             id: 3,
-            name: 'Yellow',
-            head: '#806815',
-            body: '#AA9139',
+            name: 'Player 4',
+            color: 3,
             controls: controls.D,
             isComputer: true
         }),
-        /* /
+        /* */
         new SneekMe.player({
             id: 4,
-            name: 'Green',
-            head: '#196811',
-            body: '#378B2E',
+            name: 'Player 5',
+            color: 4,
             isComputer: true
         }),
         new SneekMe.player({
             id: 5,
-            name: 'Teal',
-            head: '#0D4C4C',
-            body: '#226666',
+            name: 'Player 6',
+            color: 5,
             isComputer: true
         }),
         new SneekMe.player({
             id: 6,
-            name: 'Pink',
-            head: '#671140',
-            body: '#892D5F',
+            name: 'Player 7',
+            color: 6,
             isComputer: true
         }),
         new SneekMe.player({
             id: 7,
-            name: 'Grey',
-            head: '#333333',
-            body: '#707070',
+            name: 'Player 8',
+            color: 7,
             isComputer: true
         }),
+        /* /
+        new SneekMe.player({
+            id: 8,
+            name: 'Player 9',
+            color: 8,
+            isComputer: true
+        }),
+        new SneekMe.player({
+            id: 9,
+            name: 'Player 10',
+            color: 9,
+            isComputer: true
+        })
         /* */
         ];
     }

@@ -1,16 +1,51 @@
 ﻿(function () {
     //Default level
     var tiles = {
-            none: 0,
-            solid: 1,
-            breakable: 2,
-            food: 50,
-            goldfood: 55,
-            weapon: 22,
-            bullit: 66,
-            deadSnake: 88,
-            snake: 99
-        };
+        none: 0,
+        solid: 1,
+        breakable: 2,
+        food: 50,
+        goldfood: 55,
+        weapon: 22,
+        bullit: 66,
+        deadSnake: 88,
+        snake: 99
+    },
+        colors = [{
+            getColor: function (i, l) {
+                var hue = i >= l ? 0 : (255 / l * i) | 0;
+                return 'hsl(' + hue + ',100%,50%)';
+            }
+        }, {
+            getColor: function (i, l) {
+                var rgb = i >= l ? 0 : (255 / l * i) | 0;
+                return 'rgb(' + rgb + ',' + rgb + ',' + rgb + ')';
+            }
+        }, {
+            head: '#1E1959',
+            body: '#373276',
+        }, {
+            head: '#3B1255',
+            body: '#562A72',
+        }, {
+            head: '#801515',
+            body: '#AA3939',
+        }, {
+            head: '#806815',
+            body: '#AA9139',
+        }, {
+            head: '#196811',
+            body: '#378B2E',
+        }, {
+            head: '#0D4C4C',
+            body: '#226666',
+        }, {
+            head: '#671140',
+            body: '#892D5F',
+        }, {
+            head: '#333333',
+            body: '#707070',
+        }];
 
     function makeImages(images, callback) {
         var result = {},
@@ -202,7 +237,7 @@
                 SneekMe.keyHandler = null;
             };
         document.getElementById('setupgame').addEventListener('click', function () {
-            SneekMe.metaGame(tiles, cw, callback);
+            SneekMe.metaGame(tiles, colors, cw, callback);
             menu.style.display = 'none';
         }, false);
 
