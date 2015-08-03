@@ -3,7 +3,7 @@ SneekMe.metaGame = function (tiles, cw, callback) {
     var container = document.getElementById('Game'),
         canvas = document.getElementById('picklevel'),
         ctx = canvas.getContext("2d"),
-        level = SneekMe.loadLevel(SneekMe.difficulties),
+        level = SneekMe.loadLevel(SneekMe.blank),
         tilewidth = 2,
         width = 80 * tilewidth,
         height = 56 * tilewidth;
@@ -79,7 +79,7 @@ SneekMe.metaGame = function (tiles, cw, callback) {
             head: '#3B1255',
             body: '#562A72',
             controls: controls.B,
-            //isComputer: true
+            isComputer: true
         }),
         /* /
         new SneekMe.player({

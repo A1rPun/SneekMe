@@ -31,6 +31,7 @@
         width = level[0].length * cw,
         mid = cw / 2,
         AUTOPILOTCOUNT = 20,
+        FINDPATHCOUNT = 5,
         //Number of point to win
         MAX_SCORE = 10,
         //Number of meal
@@ -126,13 +127,8 @@
         /* */
         if (typeof pickip_loop != "undefined") clearInterval(pickip_loop);
         pickip_loop = setInterval(function () {
-            if (foods.length < MAX_FOODS) {
-                create_food();
-            }
-
-            if (weapons.length < MAX_WEAPONS) {
-                create_weapon();
-            }
+            create_food();
+            create_weapon();
         }, PICKUP_INTERVAL);
         /* */
 
@@ -222,37 +218,37 @@
         ~respawns.index && drawStat('Least respawns: ' + respawns.value + ' ' + players[respawns.index].name);
     }
 
-    function findEmptyPos() {
-        var f, pos;
-
-        function getPos() {
-            return {
-                x: rand((width / cw) - 3),
-                y: rand((height / cw) - 1)
-            }
-        }
-
-        while (!f) {
-            pos = getPos();
-            if (level[pos.y][pos.x] === tiles.none) {
-                f = true;
-            }
-        }
-        return pos;
+    function findEmptyPos(prioritize) {
+        //TODO: 3x3 spawn
+        var available = [],
+            fallback = [],
+            acceptableTiles = [tiles.food, tiles.goldfood, tiles.deadSnake];
+        for (var y = level.length; y--;)
+            for (var x = level[y].length; x--;)
+                if (level[y][x] === tiles.none)
+                    available.push({ x: x, y: y });
+                else if (prioritize && acceptableTiles.indexOf(level[y][x]) !== -1)
+                    fallback.push({ x: x, y: y });
+        return available.length
+           ? available[rand(available.length)]
+           : (prioritize && fallback.length
+                ? fallback[rand(fallback.length)]
+                : null);
     }
 
     function create_snake(player) {
-        var pos = findEmptyPos();
-        player.snake = [];       
-        player.snake.push({
-            x: pos.x,
-            y: pos.y
-        });
+        player.snake = [];
+        var pos = findEmptyPos(true);
+        if (!pos) return;
+        player.snake.push(pos);
         level[pos.y][pos.x] = tiles.snake;
     }
 
     function create_food() {
+        if (foods.length >= MAX_FOODS)
+            return;
         var pos = findEmptyPos();
+        if (!pos) return;
         foods.push(pos);
 
         if (rand(100) < GOLD_CHANCE) {
@@ -263,7 +259,10 @@
     }
 
     function create_weapon() {
+        if (weapons.length >= MAX_WEAPONS)
+            return;
         var pos = findEmptyPos();
+        if (!pos) return;
         weapons.push(pos);
         level[pos.y][pos.x] = tiles.weapon;
     }
@@ -284,71 +283,113 @@
         var d = player.direction,
             ox = player.snake[0].x,
             oy = player.snake[0].y;
-        player.count++;
-
+        
         function findPath() {
             //log('findPath', ox, oy, ' target', player.tx, player.ty);
             //pathFinder.findPath(ox, oy, player.tx, player.ty, function (path) {
-            var path = pathFinder.findPath([ox, oy], [player.tx, player.ty]);
+            player.findCount++;
+            if (player.findCount >= FINDPATHCOUNT) {
+                setTarget();
+                return;
+            }
+
+            var path = null;
+            if(~player.tx && ~player.ty)            
+                path = pathFinder.findPath([ox, oy], [player.tx, player.ty]);
+
             if (path === null || path.length < 2) {
                 //log('OH NOES WHATTODO');
-                player.autoPilot = true;
                 player.path = [];
-                player.count = 0;
+                player.pathCount = 0;
                 autoPilot();
             } else {
                 player.autoPilot = false;
-                player.path = path;                
-                player.count = 1;
-                var newDirection = player.path[1];//player.count
+                player.path = path;
+                player.pathCount = 1;
+                var newDirection = player.path[1];//player.pathCount
                 player.direction = findDirection(ox, oy, newDirection[0], newDirection[1]);
             }
         }
 
-        function autoPilot() {
-            var dir = calculateDirection(ox, oy, d);
+        function findRandomFood() {
+            return foods[rand(foods.length)];
+        }
 
-            if (!pathFinder.canWalkHere(dir[0], dir[1])) {
-                //log('DAMN IM STUCK');
+        function findClosestFood() {
+            //TODO: create array sorted on distance asc
+            //loop reachable distances and find the first accesible route
+            //ALSO: loop every food and find shortest route with astar, this is not recommended with a large array but more effective
+            var closestIndex = -1,
+                closestDistance = 9999;//lazy
+
+            for (var i = foods.length; i--;) {
+                var food = foods[i],
+                    xd = food.x - ox,
+                    yd = food.y - oy,
+                    distance = Math.sqrt(xd * xd + yd * yd);
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestIndex = i;
+                }
+            }
+            return ~closestIndex ? foods[closestIndex] : { x: -1, y: -1 };
+        }
+
+        function autoPilot() {
+            player.autoPilot = true;
+            player.autoCount++;
+
+            if (player.autoCount >= AUTOPILOTCOUNT) {
+                setTarget();
+                return;
+            }
+
+            //var dir = calculateDirection(ox, oy, d);
+            //if (!pathFinder.canWalkHere(dir[0], dir[1])) {
                 var rescue = pathFinder.Neighbours(ox, oy);
 
                 if (rescue.length) {
-                    rescue = rescue[0];//maybe random?
-                    
+                    rescue = rescue[0];//rand(rescue.length)];
                     var newDirection = findDirection(ox, oy, rescue.x, rescue.y);
                     player.direction = newDirection;
-                    //log('gonna go this way ' + d + ' ' + newDirection);
                 } else {
                     //log('CRASH');
                 }
-            }
+            //}
         }
 
-        if (player.autoPilot && player.count < AUTOPILOTCOUNT) { 
+        function setTarget() {
+            var f = findClosestFood();
+            player.tx = f.x;
+            player.ty = f.y;
+            player.findCount = 0;
+            player.autoCount = 0;
+            findPath();
+        }
+        //If the player does not have a target OR the target isnt a type of food
+        if (player.tx === -1
+            || level[player.ty][player.tx] !== tiles.food
+            && level[player.ty][player.tx] !== tiles.goldfood) {
+            setTarget();
+        } else if (player.autoPilot) {
             autoPilot();
         } else {
+            //Traversing the path
+            //Is player.path[player.pathCount] always a value?
+            player.pathCount++;
+            var path = player.path[player.pathCount],
+                nx = path[0],
+                ny = path[1];
 
-            if (!(player.tx > -1) || !(level[player.ty][player.tx] === tiles.food || level[player.ty][player.tx] === tiles.goldfood)) {
-                var f = foods[rand(foods.length - 1)];
-                player.tx = f.x;
-                player.ty = f.y;
-                findPath();
-            } else if (player.count >= player.path.length) {
+            if (acceptable.indexOf(level[ny][nx]) === -1) {
                 findPath();
             } else {
-                var path = player.path[player.count],
-                    nx = path[0],
-                    ny = path[1];
-
-                if (acceptable.indexOf(level[ny][nx]) === -1) {
-                    findPath();
-                } else {
-                    player.direction = findDirection(ox, oy, nx, ny);
-                }
+                player.direction = findDirection(ox, oy, nx, ny);
             }
         }
-
-        if (player.shots && rand(100) > 95) {
+        //Shoot random
+        //TODO: calculate shot
+        if (player.shots && rand(100) < 5) {
             player.shoot = true;
         }
     }
@@ -405,7 +446,8 @@
 
     function plotBullits() {
         for (var i = bullits.length; i--;) {
-            plotBullit(bullits[i], i);
+            if(!plotBullit(bullits[i]))
+                bullits.splice(i, 1);
         }
     }
 
@@ -421,7 +463,6 @@
             bullit.x > bounds.right ||
             bullit.y < bounds.top ||
             bullit.y > bounds.bottom) {
-            bullits.splice(i, 1);
             return;
         }
 
@@ -434,11 +475,11 @@
                 players[bullit.owner].shotsHit++;
                 level[bullit.y][bullit.x] = tiles.none;
             }
-            bullits.splice(i, 1);
             return;
         }
         level[bullit.y][bullit.x] = tiles.bullit;
         bullit.distance++;
+        return true;
     }
 
     function bullitCollision(bullit){
@@ -465,6 +506,23 @@
                     drawHud();
                 }
                 break;
+            }
+        }
+    }
+
+    function checkPickupStates() {
+        var i;
+        for (i = foods.length; i--;) {
+            var food = foods[i];
+            if (level[food.y][food.x] !== tiles.food && level[food.y][food.x] !== tiles.goldfood) {
+                foods.splice(i, 1);
+            }
+        }
+
+        for (i = weapons.length; i--;) {
+            var weapon = weapons[i];
+            if (level[weapon.y][weapon.x] !== tiles.weapon) {
+                weapons.splice(i, 1);
             }
         }
     }
@@ -525,9 +583,9 @@
             //Create a new head instead of moving the tail
             if (tile === tiles.food || tile === tiles.goldfood) {
                 var gold = tile === tiles.goldfood;
-                SneekMe.playSound('food');
-                check_collision(nx, ny, foods, true);                
+                SneekMe.playSound('food');             
                 player.foodCount++;
+                player.findCount = 0;
                 player.tails += gold ? ADD_GOLD_TAILS : ADD_TAILS;
                 player.score += gold ? ADD_GOLD_FOOD_SCORE : ADD_FOOD_SCORE;
 
@@ -535,11 +593,9 @@
                 if (foods.length < players.length) {
                     create_food();
                 }
-
                 drawHud();
             } else if (tile === tiles.weapon) {
                 SneekMe.playSound('weapon');
-                check_collision(nx, ny, weapons, true);
                 player.shots += ADD_SHOTS;
                 if (player.shots > MAX_SHOTS) player.shots = MAX_SHOTS;
                 drawHud();
@@ -570,6 +626,7 @@
                 return;
             }
         }
+        checkPickupStates();
         paint();
     }
 
@@ -665,6 +722,9 @@
             if (player.score > crown.value) {
                 crown.index = i;
                 crown.value = player.score;
+            } else if (player.score === crown.value) {
+                //if there a multiple players with the same score, reset the index
+                crown.index = -1;
             }
 
             //paint head of snake
@@ -695,22 +755,25 @@
             }
         }
 
-        if (~crown.index) {
-            var p = players[crown.index],
-                crownDirection = p.direction === 1 || p.direction === 3 ? 0 : 1,
-                crownPos = calculateDirection(p.snake[0].x, p.snake[0].y, crownDirection);
-
-            if (crownDirection) {
-                ctx.save();
-                ctx.translate(crownPos[0] * cw + mid, crownPos[1] * cw + mid);
-                ctx.rotate(90 * Math.PI / 180);
-                ctx.drawImage(SneekMe.images.crown, -mid, -mid);
-                ctx.restore();
-            } else {                
-                ctx.drawImage(SneekMe.images.crown, crownPos[0] * cw, crownPos[1] * cw);
-            }
-        }
+        drawCrown(crown);
     }
+
+    function drawCrown(crown) {
+        if (!crown || crown.index === -1) return;
+        var p = players[crown.index],
+            crownDirection = p.direction === 1 || p.direction === 3 ? 0 : 1,
+            crownPos = calculateDirection(p.snake[0].x, p.snake[0].y, crownDirection);
+
+        if (crownDirection) {
+            ctx.save();
+            ctx.translate(crownPos[0] * cw + mid, crownPos[1] * cw + mid);
+            ctx.rotate(90 * Math.PI / 180);
+            ctx.drawImage(SneekMe.images.crown, -mid, -mid);
+            ctx.restore();
+        } else {
+            ctx.drawImage(SneekMe.images.crown, crownPos[0] * cw, crownPos[1] * cw);
+        }
+    }    
 
     function drawBullits() {
         for (var i = bullits.length; i--;) {
@@ -768,11 +831,12 @@
                 ctx.fillText(level[i][j], j * cw + 5, i * cw + 10);
             }
         }
-
+    }
+    function drawPaths(){
         for (var i = players.length; i--;) {
             var p = players[i].path;
             if (p && p.length) {
-                var count = players[i].count;
+                var count = players[i].pathCount;
                 if (!p[count]) continue;
                 ctx.strokeStyle = players[i].body;
                 ctx.beginPath();
@@ -801,14 +865,14 @@
         drawLevel();
         drawSnake();
         drawBullits();
-
-        if (SneekMe.keys[8]) drawDebug();
+        
+        if (SneekMe.keys[111]) drawDebug();
+        if (SneekMe.keys[106]) drawPaths();
     }
 
-    function check_collision(x, y, array, splice) {
+    function check_collision(x, y, array) {
         for (var i = 0; i < array.length; i++) {
             if (array[i].x == x && array[i].y == y) {
-                if (splice) array.splice(i, 1);
                 return i;
             }
         }

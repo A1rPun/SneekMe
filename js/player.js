@@ -50,9 +50,13 @@
 
             if (me.isComputer) {
                 me.path = [];
-                me.count = 0;
+                me.pathCount = 0;
+                me.autoCount = 0;
+                me.findCount = 0;
                 me.autoPilot = false;
-                me.direction = 1;//random?
+                me.direction = -1;//
+                me.tx = -1;
+                me.ty = -1;
             } else {
                 me.direction = -1;
                 me.directions = [];
