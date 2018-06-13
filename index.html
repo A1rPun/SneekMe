@@ -18,15 +18,15 @@
         <div id="tiles" class="hud" style="display: none;">
             <div class="hudcontainer">
                 <div class="btnrow">
-                    <button class="btn btn-small" id="new">New</button>
-                    <button class="btn btn-small" id="load">Load</button>
-                    <button class="btn btn-small" id="save">Save</button>
-                    <button class="btn btn-small" id="share">Share</button>
+                    <button class="btn-small" id="new">New</button>
+                    <button class="btn-small" id="load">Load</button>
+                    <button class="btn-small" id="save">Save</button>
+                    <button class="btn-small" id="share">Share</button>
                 </div>
                 <div class="btnrow">
-                    <button class="btn btn-small" id="exit">Exit</button>
-                    <button class="btn btn-small" id="theme">Theme</button>
-                    <button class="btn btn-small" id="undo">Undo</button>
+                    <button class="btn-small" id="exit">Exit</button>
+                    <button class="btn-small" id="theme">Theme</button>
+                    <button class="btn-small" id="undo">Undo</button>
                 </div>
             </div>
             <div class="hudcontainer">
@@ -116,33 +116,54 @@
 
             </div>
             <div class="row">
-                <button id="cancelcontrols">Cancel</button>
-                <button id="defaultcontrols">Default</button>
-                <button id="savecontrols">Save</button>
+                <div class="col-4">
+                    <button class="btn-large" id="cancelcontrols">Cancel</button>
+                </div>
+                <div class="col-4">
+                    <button class="btn-large" id="defaultcontrols">Default</button>
+                </div>
+                <div class="col-4">
+                    <button class="btn-large" id="savecontrols">Save</button>
+                </div>
             </div>
         </div>
 
         <div class="container" id="Game" style="display: none;">
             <div class="row">
-                <div class="center" style="width:160px;">
+                <div class="col-4" style="text-align: center;">
                     <canvas id="picklevel"></canvas>
-                </div>                
+                </div>
+                <div class="col-4"></div>
+                <div class="col-4">
+                    <!-- picktheme -->
+                </div>
             </div>
             <div class="row">
-                <div class="center" style="width:100px;">test</div>
+                <div class="col-6">
+                    <div class="col-2">
+                        <input type="checkbox" />
+                    </div>
+                    <div class="col-10">
+                        <input type="text" />
+                    </div>
+                </div>
             </div>
             <div class="row">
-                <button id="cancelgame">Cancel</button>
-                <button id="playgame">Play</button>
+                <div class="col-6">
+                    <button class="btn-large" id="cancelgame">Cancel</button>
+                </div>
+                <div class="col-6">
+                    <button class="btn-large" id="playgame">Play</button>
+                </div>
             </div>
         </div>
 
         <div class="container" id="Menu">
             <div class="menuwrap">
-                <button id="setupgame">Game</button>
-                <button id="setupcontrols">Controls</button>
-                <button id="setup">Advanced setup</button>
-                <button id="leveleditor">Level editor</button>
+                <button class="btn-large" id="setupgame">Game</button>
+                <button class="btn-large" id="setupcontrols">Controls</button>
+                <button class="btn-large" id="setup">Advanced setup</button>
+                <button class="btn-large" id="leveleditor">Level editor</button>
             </div>
         </div>
     </div>

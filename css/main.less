@@ -67,18 +67,6 @@ body{
     }
 }
 
-#Menu button {
-    .btn;
-    display: block;
-    width: 100%;
-    height: 64px;
-    font-size: 2em;
-    color: #fff;
-    background-color: blue;
-    opacity: 0.5;
-    margin-bottom: 50px;
-}
-
 #tiles{
     //position:absolute;
     //top:0;
@@ -95,6 +83,30 @@ body{
 
 .row{
     width: 100%;
+    display: inline-block;
+}
+.col{
+    display: inline-block;
+}
+
+.col-2 {
+    .col;
+    width: 19.4%;
+}
+
+.col-4{
+    .col;
+    width: 33%;
+}
+
+.col-6{
+    .col;
+    width: 49.4%;
+}
+
+.col-10 {
+    .col;
+    width: 79.4%;
 }
 
 .hudcontainer{
@@ -109,16 +121,28 @@ body{
 .btn{
     border: none;
     cursor: pointer;
+    background: blue;
+    color: white;
 }
 
 .btn-small{
+    .btn;
     height: @hudheight / 2 - 4;
-    background: blue;
-    color: white;
     width: 50px;
-    margin: 2px;
+    height: 10px;
+    margin: 0 2px;
     font-size: 0.6em;    
 }
+
+.btn-large{
+    .btn;
+    width: 100%;
+    height: 64px;
+    font-size: 2em;
+    opacity: 0.5;
+    margin-bottom: 50px;
+}
+
 
 .mode{
     margin: 1px 2px;
