@@ -61,78 +61,75 @@ SneekMe.metaGame = function (tiles, colors, cw, callback) {
 
     function getPlayers() {
         var controls = SneekMe.controls;
-        return [
-        /* */
-        new SneekMe.player({
-            id: 0,
-            name: 'Player 1',
-            color: 0,
-            controls: controls.A,
-            //relative: true
-            isComputer: true
-        }),
-        /* */
-        new SneekMe.player({
-            id: 1,
-            name: 'Player 2',
-            color: 1,
-            controls: controls.B,
-            isComputer: true
-        }),
-        /* */
-        new SneekMe.player({
-            id: 2,
-            name: 'Player 3',
-            color: 2,
-            controls: controls.C,
-            isComputer: true
-        }),
-        new SneekMe.player({
-            id: 3,
-            name: 'Player 4',
-            color: 3,
-            controls: controls.D,
-            isComputer: true
-        }),
-        /* */
-        new SneekMe.player({
-            id: 4,
-            name: 'Player 5',
-            color: 4,
-            isComputer: true
-        }),
-        new SneekMe.player({
-            id: 5,
-            name: 'Player 6',
-            color: 5,
-            isComputer: true
-        }),
-        new SneekMe.player({
-            id: 6,
-            name: 'Player 7',
-            color: 6,
-            isComputer: true
-        }),
-        new SneekMe.player({
-            id: 7,
-            name: 'Player 8',
-            color: 7,
-            isComputer: true
-        }),
-        /* /
-        new SneekMe.player({
-            id: 8,
-            name: 'Player 9',
-            color: 8,
-            isComputer: true
-        }),
-        new SneekMe.player({
-            id: 9,
-            name: 'Player 10',
-            color: 9,
-            isComputer: true
-        })
-        /* */
+        var players = [
+            /* */
+            new SneekMe.player({
+                name: 'Player 1',
+                controls: controls.A,
+                //relative: true
+                //isComputer: true
+            }),
+            /* */
+            new SneekMe.player({
+                name: 'Player 2',
+                controls: controls.B,
+                isComputer: true
+            }),
+            /* */
+            new SneekMe.player({
+                name: 'Player 3',
+                controls: controls.C,
+                isComputer: true
+            }),
+            new SneekMe.player({
+                name: 'Player 4',
+                controls: controls.D,
+                isComputer: true
+            }),
+            /* /
+            new SneekMe.player({
+                id: 4,
+                name: 'Player 5',
+                color: 4,
+                isComputer: true
+            }),
+            new SneekMe.player({
+                id: 5,
+                name: 'Player 6',
+                color: 5,
+                isComputer: true
+            }),
+            new SneekMe.player({
+                id: 6,
+                name: 'Player 7',
+                color: 6,
+                isComputer: true
+            }),
+            new SneekMe.player({
+                id: 7,
+                name: 'Player 8',
+                color: 7,
+                isComputer: true
+            }),
+            /* /
+            new SneekMe.player({
+                id: 8,
+                name: 'Player 9',
+                color: 8,
+                isComputer: true
+            }),
+            new SneekMe.player({
+                id: 9,
+                name: 'Player 10',
+                color: 9,
+                isComputer: true
+            })
+            /* */
         ];
+        for (var i = players.length; i--;) {
+            players[i].id = i;
+            players[i].color = i;
+        }
+        return players;
     }
 }

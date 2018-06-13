@@ -2,50 +2,52 @@
     //Default level
     var tiles = {
         none: 0,
-        solid: 1,
-        breakable: 2,
+        solid: 10,
+        altSolid: 11,
+        breakable: 12,
+        altBreakable: 13,
         food: 50,
         goldfood: 55,
         weapon: 22,
         bullit: 66,
         deadSnake: 88,
         snake: 99
-    },
-        colors = [{
-            getColor: function (i, l) {
-                var hue = i >= l ? 0 : (255 / l * i) | 0;
-                return 'hsl(' + hue + ',100%,50%)';
-            }
-        }, {
-            getColor: function (i, l) {
-                var rgb = i >= l ? 0 : (255 / l * i) | 0;
-                return 'rgb(' + rgb + ',' + rgb + ',' + rgb + ')';
-            }
-        }, {
-            head: '#1E1959',
-            body: '#373276',
-        }, {
-            head: '#3B1255',
-            body: '#562A72',
-        }, {
-            head: '#801515',
-            body: '#AA3939',
-        }, {
-            head: '#806815',
-            body: '#AA9139',
-        }, {
-            head: '#196811',
-            body: '#378B2E',
-        }, {
-            head: '#0D4C4C',
-            body: '#226666',
-        }, {
-            head: '#671140',
-            body: '#892D5F',
-        }, {
-            head: '#333333',
-            body: '#707070',
-        }];
+    };
+    var colors = [{
+        getColor: function (i, l) {
+            var hue = i >= l ? 0 : (255 / l * i) | 0;
+            return 'hsl(' + hue + ',100%,50%)';
+        }
+    }, {
+        getColor: function (i, l) {
+            var rgb = i >= l ? 0 : (255 / l * i) | 0;
+            return 'rgb(' + rgb + ',' + rgb + ',' + rgb + ')';
+        }
+    }, {
+        head: '#1E1959',
+        body: '#373276',
+    }, {
+        head: '#3B1255',
+        body: '#562A72',
+    }, {
+        head: '#801515',
+        body: '#AA3939',
+    }, {
+        head: '#806815',
+        body: '#AA9139',
+    }, {
+        head: '#196811',
+        body: '#378B2E',
+    }, {
+        head: '#0D4C4C',
+        body: '#226666',
+    }, {
+        head: '#671140',
+        body: '#892D5F',
+    }, {
+        head: '#333333',
+        body: '#707070',
+    }];
 
     function makeImages(images, callback) {
         var result = {},
@@ -91,7 +93,7 @@
                 sound.currentTime = 0;
             } catch (e) {
 
-            }            
+            }
 
             if (loop) {
                 if (typeof sound.loop === 'boolean') {
@@ -132,19 +134,44 @@
     };
 
     SneekMe.saveLevel = function (lvl) {
-        SneekMe.store.set('level', lvl);
+        var level = lvl.reduce(function (acc, cur) {
+            return acc + cur.join(',') + ',';
+        }, '');
+        level = level.slice(0, -1);
+        SneekMe.store.set('level', level);
     };
 
     SneekMe.loadLevel = function (lvl) {
         if (!lvl) return;
 
-        try {
-            lvl = JSON.parse(lvl);
-        } catch (e) { }
-        //is valid level
-        if (Array.isArray(lvl) && lvl.length === 56) {
-            //TODO: loop every row to check lengths
-            return lvl;
+        var split = lvl.split(',');
+        /*
+        TODO: support original snakeme levels
+        if (split.length === 1) {
+            split = lvl.split('\n');
+            if (split.length === 4481)
+                split.pop();
+        }
+        */
+        if (split.length === 4480) {
+            split = split.map(function (v) {
+                var n = +v;
+                // Bug if tiles.none === -1 so this is a "workaround"
+                if (n === -1)
+                    n = tiles.none;
+                // Change to respective tiles.. TODO: implement alternate tiles
+                if (n === tiles.altSolid)
+                    n = tiles.solid;
+                if (n === tiles.altBreakable)
+                    n = tiles.breakable;
+                return n;
+            });
+
+            var level = [];
+            for (var i = 0; i < 56; i++) {
+                level.push(split.splice(0, 80));
+            }
+            return level;
         }
     };
     SneekMe.setControls = function () {
@@ -213,7 +240,7 @@
     });
 
     function init(images) {
-        
+
         SneekMe.setControls();
         SneekMe.keys = [];
         SneekMe.images = images;
@@ -222,7 +249,7 @@
             SneekMe.keys[e.keyCode] = true;
             SneekMe.keyHandler && SneekMe.keyHandler(e.keyCode);
         });
-        document.addEventListener('keyup', function (e) {            
+        document.addEventListener('keyup', function (e) {
             e = e ? e : window.event;
             SneekMe.keys[e.keyCode] = false;
         });
