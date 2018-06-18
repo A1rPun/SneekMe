@@ -7,10 +7,10 @@ A HTML5 & Javascript game inspired by SnakeMe.
 ## ToDo
 
 - Best accuracy & most shots stats
+- End game stats styling + presentation
 - Advanced options
-- Pre-game
+- Pre-game styling
 
 ## Known bugs
 
-- Bullets go through tiles if you are next to them
-- Bullets don't wrap the sides of the level
+- AI will get stuck if all foods are unreachable

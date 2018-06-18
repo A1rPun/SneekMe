@@ -427,9 +427,10 @@
         player.shoot = false;
         SneekMe.playSound('shoot');        
         drawHud();
-        bullits.unshift(one, two);
-        plotBullit(two, 1);
-        plotBullit(one, 0);
+        if (plotBullit(one))
+            bullits.push(one);
+        if (plotBullit(two))
+            bullits.push(two);
     }
 
     function createDeadSnake(snake) {
@@ -451,7 +452,7 @@
         }
     }
 
-    function plotBullit(bullit, i) {        
+    function plotBullit(bullit) {        
         if (bullit.distance)
             level[bullit.y][bullit.x] = tiles.none;
 
@@ -459,11 +460,15 @@
         bullit.x = dir[0];
         bullit.y = dir[1];
 
-        if (bullit.x < bounds.left ||
-            bullit.x > bounds.right ||
-            bullit.y < bounds.top ||
-            bullit.y > bounds.bottom) {
-            return;
+        //Wrap around
+        if (bullit.x < bounds.left) {
+            bullit.x = bounds.right;
+        } else if (bullit.x > bounds.right) {
+            bullit.x = bounds.left;
+        } else if (bullit.y < bounds.top) {
+            bullit.y = bounds.bottom;
+        } else if (bullit.y > bounds.bottom) {
+            bullit.y = bounds.top;
         }
 
         var tile = level[bullit.y][bullit.x];
