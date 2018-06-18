@@ -174,8 +174,9 @@
             return level;
         }
     };
-    SneekMe.setControls = function () {
+    function setSettings() {
         SneekMe.controls = SneekMe.store.get('controls') || SneekMe.getDefaultControls();
+        SneekMe.players = SneekMe.store.get('players');
     };
     SneekMe.getDefaultControls = function () {
         return {
@@ -240,8 +241,7 @@
     });
 
     function init(images) {
-
-        SneekMe.setControls();
+        setSettings();
         SneekMe.keys = [];
         SneekMe.images = images;
         document.addEventListener('keydown', function (e) {

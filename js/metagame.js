@@ -11,9 +11,11 @@ SneekMe.metaGame = function (tiles, colors, cw, callback) {
     init();
     function init() {
         var lvl = SneekMe.loadLevel(SneekMe.store.getItem('level'));
-        if (lvl) {
+        if (lvl)
             level = lvl;
-        }
+
+        if (SneekMe.players)
+            loadPlayers();
 
         container.style.display = '';
         canvas.width = width;
@@ -26,8 +28,16 @@ SneekMe.metaGame = function (tiles, colors, cw, callback) {
         }, false);
         document.getElementById('playgame').addEventListener('click', function () {
             destroy();
+            savePlayers();
             SneekMe.startGame(getPlayers(), level, tiles, colors, cw, callback);
         }, false);
+
+        var controlButtons = container.querySelectorAll('.btn-controls');
+        var controlListener = function () {
+            this.innerHTML = this.innerHTML === 'Key' ? 'AI' : 'Key';
+        };
+        for (var i = controlButtons.length; i--;)
+            controlButtons[i].addEventListener('click', controlListener);
     }
 
     function destroy() {
@@ -60,76 +70,50 @@ SneekMe.metaGame = function (tiles, colors, cw, callback) {
     }
 
     function getPlayers() {
+        var players = [];
         var controls = SneekMe.controls;
-        var players = [
-            /* */
-            new SneekMe.player({
-                name: 'Player 1',
-                controls: controls.A,
+        var playerSettings = container.querySelectorAll('.player');
+        for (var i = 0, l = playerSettings.length; i < l; i++) {
+            var settings = playerSettings[i];
+            if (!settings.querySelector('.cbx-active').checked)
+                continue;
+
+            var player = new SneekMe.player({
+                id: i,
+                color: i,
+                name: settings.querySelector('.txt-name').value,
+                controls: [controls.A, controls.B, controls.C, controls.D][i % 4],
                 //relative: true
-                //isComputer: true
-            }),
-            /* */
-            new SneekMe.player({
-                name: 'Player 2',
-                controls: controls.B,
-                isComputer: true
-            }),
-            /* */
-            new SneekMe.player({
-                name: 'Player 3',
-                controls: controls.C,
-                isComputer: true
-            }),
-            new SneekMe.player({
-                name: 'Player 4',
-                controls: controls.D,
-                isComputer: true
-            }),
-            /* /
-            new SneekMe.player({
-                id: 4,
-                name: 'Player 5',
-                color: 4,
-                isComputer: true
-            }),
-            new SneekMe.player({
-                id: 5,
-                name: 'Player 6',
-                color: 5,
-                isComputer: true
-            }),
-            new SneekMe.player({
-                id: 6,
-                name: 'Player 7',
-                color: 6,
-                isComputer: true
-            }),
-            new SneekMe.player({
-                id: 7,
-                name: 'Player 8',
-                color: 7,
-                isComputer: true
-            }),
-            /* /
-            new SneekMe.player({
-                id: 8,
-                name: 'Player 9',
-                color: 8,
-                isComputer: true
-            }),
-            new SneekMe.player({
-                id: 9,
-                name: 'Player 10',
-                color: 9,
-                isComputer: true
-            })
-            /* */
-        ];
-        for (var i = players.length; i--;) {
-            players[i].id = i;
-            players[i].color = i;
+                isComputer: settings.querySelector('.btn-controls').innerHTML === 'AI',
+            });
+            players.push(player);
         }
         return players;
+    }
+
+    function savePlayers(players) {
+        var players = [];
+        var playerSettings = container.querySelectorAll('.player');
+        for (var i = 0, l = playerSettings.length; i < l; i++) {
+            var settings = playerSettings[i];
+            players.push({
+                active: settings.querySelector('.cbx-active').checked,
+                name: settings.querySelector('.txt-name').value,
+                isComputer: settings.querySelector('.btn-controls').innerHTML === 'AI',
+            });
+        }
+        SneekMe.store.set('players', players);
+        SneekMe.players = players;
+    }
+
+    function loadPlayers() {
+        var players = SneekMe.players;
+        var playerSettings = container.querySelectorAll('.player');
+        for (var i = 0, l = playerSettings.length; i < l; i++) {
+            var settings = playerSettings[i];
+            settings.querySelector('.cbx-active').checked = players[i].active;
+            settings.querySelector('.txt-name').value = players[i].name;
+            settings.querySelector('.btn-controls').innerHTML = players[i].isComputer ? 'AI' : 'Key';
+        }
     }
 }
