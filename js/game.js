@@ -560,10 +560,10 @@
             } else if (ny > bounds.bottom) {
                 ny = bounds.top;
             }
+            var tile = level[ny][nx];
 
-            //Now if the head of the snake bumps into an unacceptable tile, the game will restart
-            if (acceptable.indexOf(level[ny][nx]) === -1) {
-
+            if (acceptable.indexOf(tile) === -1) {
+                //Now if the head of the snake bumps into an unacceptable tile, the game will restart
                 if (level[ny][nx] === tiles.snake) {
                     for (var j = players.length; j--;) {
                         var player2 = players[j],
@@ -576,12 +576,9 @@
                     }
                 }
                 respawn(player);
-                continue;
-            }
-
-            var tile = level[ny][nx];
-            //Create a new head instead of moving the tail
-            if (tile === tiles.food || tile === tiles.goldfood) {
+                continue;    
+            } else if (tile === tiles.food || tile === tiles.goldfood) {
+                //Create a new head instead of moving the tail
                 var gold = tile === tiles.goldfood;
                 SneekMe.playSound('food');             
                 player.foodCount++;
@@ -613,11 +610,11 @@
                 tail.x = nx;
                 tail.y = ny;
             }
-
             level[tail.y][tail.x] = tiles.snake;
             player.snake.unshift(tail); //puts back the tail as the first cell     
             
-            if(player.shoot) shoot(player);
+            if (player.shoot)
+                shoot(player);
 
             player.registerStats();
 
