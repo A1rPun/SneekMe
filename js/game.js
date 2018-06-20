@@ -21,8 +21,9 @@
         ctx = canvas.getContext("2d"),
         hud = document.getElementById('hud'),
         hudctx = hud.getContext("2d"),
+        settings = SneekMe.settings,
         gameState = new SneekMe.gameState({
-            fps: 10,//orignal = 12
+            fps: settings.FPS,
             canvas: canvas,
             context: ctx,
             states: { game: update }
@@ -32,38 +33,17 @@
         mid = cw / 2,
         AUTOPILOTCOUNT = 20,
         FINDPATHCOUNT = 5,
-        //Number of point to win
-        MAX_SCORE = 10,
-        //Number of meal
-        MAX_FOODS = 10,
-        //Number of weapons
-        MAX_WEAPONS = 10,
-        MAX_SHOTS = 10,
-        //Increase snake length
-        ADD_TAILS = 5,
-        ADD_GOLD_TAILS = 25,
+        MAX_SHOTS = 10,        
         //Add shots
         ADD_SHOTS = 1,
-        //Point got when snake eats food
-        ADD_FOOD_SCORE = 1,
-        //Point got when snake eats goldfood
-        ADD_GOLD_FOOD_SCORE = 3,
-        //Point got when shot a snake
-        ADD_HIT_SCORE = 2,
-        //Point got when a snake crashes on you
-        ADD_BUMP_SCORE = 3,        
-        //Point lost when crashed
-        RESPAWN_PENALTY = 1,//3,
-        //Point lost when hit
-        HIT_PENALTY = 1,
         //PICKUP_INTERVAL
         PICKUP_INTERVAL = 2000,
         DEADSNAKE_INTERVAL = 8000,
         GOLD_CHANCE = 2,//of 100
         pickip_loop,
-        foods,
-        weapons,
-        bullits,
+        foods = [],
+        weapons = [],
+        bullits = [],
         pause = false,
         bounds = {
             top: 0,
@@ -80,9 +60,6 @@
         hud.width = 800; //width
         hud.height = 32;
         hud.style.display = '';
-        foods = [];
-        weapons = [];
-        bullits = [];
 
         for (var i = players.length; i--;) {
             create_snake(players[i]);
@@ -96,7 +73,7 @@
             if (key === 32) {
                 if (pause) {
                     pause = false;
-                    gameState.start('game');                    
+                    gameState.start('game');
                 } else {
                     pause = true;
                     gameState.stop();
@@ -105,7 +82,7 @@
             } else if (key === 27) {
                 destroy(true);
             }
-            
+
             for (var i = players.length; i--;) {
                 var player = players[i];
                 if (player.isComputer || !player.move) continue;
@@ -156,7 +133,7 @@
             setTimeout(function () {
                 SneekMe.keyHandler = toMenu;
             }, 1000);
-        }        
+        }
     }
 
     function gameOver(winner) {
@@ -214,7 +191,7 @@
         ~maxLife.index && drawStat('Longest life: ' + ~~(maxLife.value / 1000) + 's ' + players[maxLife.index].name);
         ~foodCount.index && drawStat('Most foods: ' + foodCount.value + ' ' + players[foodCount.index].name);
         ~shotsHit.index && drawStat('Bullits hit: ' + shotsHit.value + ' of ' + shotsHit.fired +
-                        ' (' + (shotsHit.value / shotsHit.fired * 100).toFixed(2) + '%) ' + players[shotsHit.index].name);
+            ' (' + (shotsHit.value / shotsHit.fired * 100).toFixed(2) + '%) ' + players[shotsHit.index].name);
         ~respawns.index && drawStat('Least respawns: ' + respawns.value + ' ' + players[respawns.index].name);
     }
 
@@ -230,8 +207,8 @@
                 else if (prioritize && acceptableTiles.indexOf(level[y][x]) !== -1)
                     fallback.push({ x: x, y: y });
         return available.length
-           ? available[rand(available.length)]
-           : (prioritize && fallback.length
+            ? available[rand(available.length)]
+            : (prioritize && fallback.length
                 ? fallback[rand(fallback.length)]
                 : null);
     }
@@ -245,7 +222,7 @@
     }
 
     function create_food() {
-        if (foods.length >= MAX_FOODS)
+        if (foods.length >= settings.MAX_FOODS)
             return;
         var pos = findEmptyPos();
         if (!pos) return;
@@ -259,7 +236,7 @@
     }
 
     function create_weapon() {
-        if (weapons.length >= MAX_WEAPONS)
+        if (weapons.length >= settings.MAX_WEAPONS)
             return;
         var pos = findEmptyPos();
         if (!pos) return;
@@ -283,7 +260,7 @@
         var d = player.direction,
             ox = player.snake[0].x,
             oy = player.snake[0].y;
-        
+
         function findPath() {
             //log('findPath', ox, oy, ' target', player.tx, player.ty);
             //pathFinder.findPath(ox, oy, player.tx, player.ty, function (path) {
@@ -294,7 +271,7 @@
             }
 
             var path = null;
-            if(~player.tx && ~player.ty)            
+            if (~player.tx && ~player.ty)
                 path = pathFinder.findPath([ox, oy], [player.tx, player.ty]);
 
             if (path === null || path.length < 2) {
@@ -346,15 +323,15 @@
 
             //var dir = calculateDirection(ox, oy, d);
             //if (!pathFinder.canWalkHere(dir[0], dir[1])) {
-                var rescue = pathFinder.Neighbours(ox, oy);
+            var rescue = pathFinder.Neighbours(ox, oy);
 
-                if (rescue.length) {
-                    rescue = rescue[0];//rand(rescue.length)];
-                    var newDirection = findDirection(ox, oy, rescue.x, rescue.y);
-                    player.direction = newDirection;
-                } else {
-                    //log('CRASH');
-                }
+            if (rescue.length) {
+                rescue = rescue[0];//rand(rescue.length)];
+                var newDirection = findDirection(ox, oy, rescue.x, rescue.y);
+                player.direction = newDirection;
+            } else {
+                //log('CRASH');
+            }
             //}
         }
 
@@ -397,7 +374,7 @@
     function respawn(player) {
         SneekMe.playSound('dead');
         createDeadSnake(player.snake.slice(0));
-        player.score -= RESPAWN_PENALTY;
+        player.score -= settings.RESPAWN_PENALTY;
         player.respawn();
         create_snake(player);
         drawHud();
@@ -422,10 +399,10 @@
         one.y = od[1];
         two.x = td[0];
         two.y = td[1];
-        */        
+        */
         player.shotsFired += 2;
         player.shoot = false;
-        SneekMe.playSound('shoot');        
+        SneekMe.playSound('shoot');
         drawHud();
         if (plotBullit(one))
             bullits.push(one);
@@ -447,12 +424,12 @@
 
     function plotBullits() {
         for (var i = bullits.length; i--;) {
-            if(!plotBullit(bullits[i]))
+            if (!plotBullit(bullits[i]))
                 bullits.splice(i, 1);
         }
     }
 
-    function plotBullit(bullit) {        
+    function plotBullit(bullit) {
         if (bullit.distance)
             level[bullit.y][bullit.x] = tiles.none;
 
@@ -487,7 +464,7 @@
         return true;
     }
 
-    function bullitCollision(bullit){
+    function bullitCollision(bullit) {
         for (var j = players.length; j--;) {
             var player = players[j],
                 index = check_collision(bullit.x, bullit.y, player.snake);
@@ -496,7 +473,7 @@
 
                 if (players[bullit.owner].id !== player.id) {
                     players[bullit.owner].shotsHit++;
-                    players[bullit.owner].score += ADD_HIT_SCORE;
+                    players[bullit.owner].score += settings.ADD_HIT_SCORE;
                 }
 
                 //index hit the head or 2nd index
@@ -507,7 +484,7 @@
                     var snake = player.snake;
                     player.snake = snake.slice(0, index);
                     createDeadSnake(snake.slice(index, snake.length));//leaves a 
-                    player.score -= HIT_PENALTY;//hit on head also hit penalty? if yes move this above IF statement
+                    player.score -= settings.HIT_PENALTY;//hit on head also hit penalty? if yes move this above IF statement
                     drawHud();
                 }
                 break;
@@ -548,9 +525,9 @@
             var d = player.direction,
                 nx = player.snake[0].x,
                 ny = player.snake[0].y;
-//                                                                 (\_
+            //                                                     (\_
             if (d === -1) continue;//If not moving you can't win v(^_^)v
-//                                                               |_|  ||
+            //                                                   |_|  ||
             var dir = calculateDirection(nx, ny, d);
             nx = dir[0];
             ny = dir[1];
@@ -575,21 +552,21 @@
                             index = check_collision(nx, ny, player2.snake);
 
                         if (~index) {
-                            player2.score += ADD_BUMP_SCORE;
+                            player2.score += settings.ADD_BUMP_SCORE;
                             break;
                         }
                     }
                 }
                 respawn(player);
-                continue;    
+                continue;
             } else if (tile === tiles.food || tile === tiles.goldfood) {
                 //Create a new head instead of moving the tail
                 var gold = tile === tiles.goldfood;
-                SneekMe.playSound('food');             
+                SneekMe.playSound('food');
                 player.foodCount++;
                 player.findCount = 0;
-                player.tails += gold ? ADD_GOLD_TAILS : ADD_TAILS;
-                player.score += gold ? ADD_GOLD_FOOD_SCORE : ADD_FOOD_SCORE;
+                player.tails += gold ? settings.ADD_GOLD_TAILS : settings.ADD_TAILS;
+                player.score += gold ? settings.ADD_GOLD_FOOD_SCORE : settings.ADD_FOOD_SCORE;
 
                 //Create new food
                 if (foods.length < players.length) {
@@ -608,7 +585,7 @@
                     x: nx,
                     y: ny
                 };
-                player.tails--;                
+                player.tails--;
             } else {
                 var tail = player.snake.pop(); //pops out the last cell
                 level[tail.y][tail.x] = tiles.none;
@@ -617,13 +594,13 @@
             }
             level[tail.y][tail.x] = tiles.snake;
             player.snake.unshift(tail); //puts back the tail as the first cell     
-            
+
             if (player.shoot)
                 shoot(player);
 
             player.registerStats();
 
-            if (player.score >= MAX_SCORE) {
+            if (player.score >= settings.MAX_SCORE) {
                 gameOver(player.id);
                 return;
             }
@@ -708,12 +685,12 @@
         }
     }
 
-    function drawSnake() {        
+    function drawSnake() {
         ctx.lineWidth = 2;
         var crown = { value: 0, index: -1 };
 
         //for (var i = 0, len = players.length; i< len; i++) {
-        for (var i = players.length; i--;){
+        for (var i = players.length; i--;) {
             var player = players[i];
             if (!player.snake.length) continue;
 
@@ -779,7 +756,7 @@
         } else {
             ctx.drawImage(SneekMe.images.crown, crownPos[0] * cw, crownPos[1] * cw);
         }
-    }    
+    }
 
     function drawBullits() {
         for (var i = bullits.length; i--;) {
@@ -792,8 +769,8 @@
     function drawHud() {
         hudctx.font = '10pt Calibri';
         hudctx.fillStyle = '#000000';
-        hudctx.fillRect(0, 0, hud.width, hud.height);        
-        
+        hudctx.fillRect(0, 0, hud.width, hud.height);
+
         var maxWidth = 160;//canvas.width / 4;
         for (var i = players.length; i--;) {
             var player = players[i],
@@ -823,8 +800,8 @@
             //Draw bullits
             hudctx.fillStyle = '#0000FF';
             for (var j = 0; j < player.shots; j++) {
-                hudctx.fillRect(x + j * (cw+1), y + cw + 2, cw, 2);
-            }            
+                hudctx.fillRect(x + j * (cw + 1), y + cw + 2, cw, 2);
+            }
         }
     }
 
@@ -839,7 +816,7 @@
             }
         }
     }
-    function drawPaths(){
+    function drawPaths() {
         for (var i = players.length; i--;) {
             var p = players[i].path;
             if (p && p.length) {
@@ -857,7 +834,7 @@
         }
     }
 
-    function drawPause(){
+    function drawPause() {
         if (pause) {
             ctx.font = '40pt Calibri';
             ctx.fillStyle = '#00FF00';
@@ -873,7 +850,7 @@
         drawLevel();
         drawSnake();
         drawBullits();
-        
+
         if (SneekMe.keys[111]) drawDebug();
         if (SneekMe.keys[106]) drawPaths();
     }

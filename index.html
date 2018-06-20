@@ -59,57 +59,77 @@
                         <tr>
                             <td>Left</td>
                             <td>
-                                <input type="text" name="A.left" /></td>
+                                <input type="text" name="A.left" />
+                            </td>
                             <td>
-                                <input type="text" name="B.left" /></td>
+                                <input type="text" name="B.left" />
+                            </td>
                             <td>
-                                <input type="text" name="C.left" /></td>
+                                <input type="text" name="C.left" />
+                            </td>
                             <td>
-                                <input type="text" name="D.left" /></td>
+                                <input type="text" name="D.left" />
+                            </td>
                         </tr>
                         <tr>
                             <td>Right</td>
                             <td>
-                                <input type="text" name="A.right" /></td>
+                                <input type="text" name="A.right" />
+                            </td>
                             <td>
-                                <input type="text" name="B.right" /></td>
+                                <input type="text" name="B.right" />
+                            </td>
                             <td>
-                                <input type="text" name="C.right" /></td>
+                                <input type="text" name="C.right" />
+                            </td>
                             <td>
-                                <input type="text" name="D.right" /></td>
+                                <input type="text" name="D.right" />
+                            </td>
                         </tr>
                         <tr>
                             <td>Up</td>
                             <td>
-                                <input type="text" name="A.up" /></td>
+                                <input type="text" name="A.up" />
+                            </td>
                             <td>
-                                <input type="text" name="B.up" /></td>
+                                <input type="text" name="B.up" />
+                            </td>
                             <td>
-                                <input type="text" name="C.up" /></td>
+                                <input type="text" name="C.up" />
+                            </td>
                             <td>
-                                <input type="text" name="D.up" /></td>
+                                <input type="text" name="D.up" />
+                            </td>
                         </tr>
                         <tr>
                             <td>Down</td>
                             <td>
-                                <input type="text" name="A.down" /></td>
+                                <input type="text" name="A.down" />
+                            </td>
                             <td>
-                                <input type="text" name="B.down" /></td>
+                                <input type="text" name="B.down" />
+                            </td>
                             <td>
-                                <input type="text" name="C.down" /></td>
+                                <input type="text" name="C.down" />
+                            </td>
                             <td>
-                                <input type="text" name="D.down" /></td>
+                                <input type="text" name="D.down" />
+                            </td>
                         </tr>
                         <tr>
                             <td>Shoot</td>
                             <td>
-                                <input type="text" name="A.shoot" /></td>
+                                <input type="text" name="A.shoot" />
+                            </td>
                             <td>
-                                <input type="text" name="B.shoot" /></td>
+                                <input type="text" name="B.shoot" />
+                            </td>
                             <td>
-                                <input type="text" name="C.shoot" /></td>
+                                <input type="text" name="C.shoot" />
+                            </td>
                             <td>
-                                <input type="text" name="D.shoot" /></td>
+                                <input type="text" name="D.shoot" />
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -124,6 +144,144 @@
                 </div>
                 <div class="col-4">
                     <button class="btn-large" id="savecontrols">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="container" id="Advanced" style="display: none;">
+            <div class="row">
+                <div class="col-6">
+                    Game Speed (fps)
+                </div>
+                <div class="col-4">
+                    <input type="number" name="FPS" value="10" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    Default snake length
+                </div>
+                <div class="col-4">
+                    <input type="number" name="DEFAULT_SNAKE_LENGTH" value="10" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    Increase snake length
+                </div>
+                <div class="col-4">
+                    <input type="number" name="ADD_TAILS" value="5" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-6">
+                    Number of Meal
+                </div>
+                <div class="col-4">
+                    <input type="number" name="MAX_FOODS" value="10" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    Meal change time
+                </div>
+                <div class="col-4">
+                    <input type="number" name="TIME_FOODS" value="75" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    Number of fire bonus
+                </div>
+                <div class="col-4">
+                    <input type="number" name="MAX_WEAPONS" value="10" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    Fire bonus change time
+                </div>
+                <div class="col-4">
+                    <input type="number" name="TIME_WEAPONS" value="75" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-6">
+                    Number of point to win
+                </div>
+                <div class="col-4">
+                    <input type="number" name="MAX_SCORE" value="10" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    Point got when snake eat meal
+                </div>
+                <div class="col-4">
+                    <input type="number" name="ADD_FOOD_SCORE" value="1" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    Point got when snake hit
+                </div>
+                <div class="col-4">
+                    <input type="number" name="ADD_HIT_SCORE" value="2" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    Point got when another snake crash into
+                </div>
+                <div class="col-4">
+                    <input type="number" name="ADD_BUMP_SCORE" value="3" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    Point lost when crashed
+                </div>
+                <div class="col-4">
+                    <input type="number" name="RESPAWN_PENALTY" value="3" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    Point lost when hitten
+                </div>
+                <div class="col-4">
+                    <input type="number" name="HIT_PENALTY" value="1" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-6">
+                    Increase snake length with gold meal
+                </div>
+                <div class="col-4">
+                    <input type="number" name="ADD_GOLD_TAILS" value="25" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    Point got when snake eat gold meal
+                </div>
+                <div class="col-4">
+                    <input type="number" name="ADD_GOLD_FOOD_SCORE" value="3" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-4">
+                    <button class="btn-large" id="canceladvanced">Cancel</button>
+                </div>
+                <div class="col-4">
+                    <button class="btn-large" id="defaultadvanced">Default</button>
+                </div>
+                <div class="col-4">
+                    <button class="btn-large" id="saveadvanced">Save</button>
                 </div>
             </div>
         </div>
@@ -266,7 +424,7 @@
             <div class="menuwrap">
                 <button class="btn-large" id="setupgame">Game</button>
                 <button class="btn-large" id="setupcontrols">Controls</button>
-                <button class="btn-large" id="setup">Advanced setup</button>
+                <button class="btn-large" id="setupadvanced">Advanced setup</button>
                 <button class="btn-large" id="leveleditor">Level editor</button>
             </div>
         </div>
@@ -282,6 +440,7 @@
     <script src="js/metagame.js"></script>
     <script src="js/game.js"></script>
     <script src="js/controls.js"></script>
+    <script src="js/advanced.js"></script>
     <script src="js/editor.js"></script>
     <script src="js/main.js"></script>
 </body>

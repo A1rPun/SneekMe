@@ -1,6 +1,5 @@
 ﻿SneekMe.player = (function () {
-    var DEFAULT_SNAKE_LENGTH = 9,//+1 head
-        START_DELAY = 500;
+    var START_DELAY = 500;
     // constructor
     function player(options) {
         //Default properties that can be overridden
@@ -37,7 +36,7 @@
         respawn: function () {
             var me = this;
             me.registerStats();            
-            me.tails = DEFAULT_SNAKE_LENGTH;
+            me.tails = SneekMe.settings.DEFAULT_SNAKE_LENGTH - 1; // Minus the head
             me.shots = 0;
             me.shoot = false;
             me.life = +new Date();

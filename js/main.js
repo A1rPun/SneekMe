@@ -174,8 +174,7 @@
         for (var i = 0, l = split.length; i < l; i++)
             level[i % 56].push(split[i]);
         return level;
-    };
-    
+    };    
     SneekMe.getDefaultControls = function () {
         return {
             A: {
@@ -207,7 +206,38 @@
                 shoot: 96,
             }
         };
-    }
+    };
+    SneekMe.getDefaultSettings = function () {
+        return {
+            // == Default settings ==
+            FPS: 10,
+            DEFAULT_SNAKE_LENGTH: 10,
+            //Increase snake length
+            ADD_TAILS: 5,
+            //Number of meal
+            MAX_FOODS: 10,
+            TIME_FOODS: 75,
+            //Number of weapons
+            MAX_WEAPONS: 10,
+            TIME_WEAPONS: 75,
+            //Number of point to win
+            MAX_SCORE: 10,
+            //Point got when snake eats food
+            ADD_FOOD_SCORE: 1,
+            //Point got when shot a snake
+            ADD_HIT_SCORE: 2,
+            //Point got when a snake crashes on you
+            ADD_BUMP_SCORE: 3,
+            //Point lost when crashed
+            RESPAWN_PENALTY: 3,
+            //Point lost when hit
+            HIT_PENALTY: 1,
+            // == Extra settings ==
+            ADD_GOLD_TAILS: 25,
+            //Point got when snake eats goldfood
+            ADD_GOLD_FOOD_SCORE: 3,
+        };
+    };
 
     var bg = document.getElementById('bg'),
         bgctx = bg.getContext("2d"),
@@ -240,6 +270,7 @@
 
     function init(images) {
         SneekMe.controls = SneekMe.store.get('controls') || SneekMe.getDefaultControls();
+        SneekMe.settings = SneekMe.store.get('settings') || SneekMe.getDefaultSettings();
         SneekMe.players = SneekMe.store.get('players');
         SneekMe.keys = [];
         SneekMe.images = images;
@@ -269,6 +300,11 @@
 
         document.getElementById('setupcontrols').addEventListener('click', function () {
             SneekMe.setupcontrols(callback);
+            menu.style.display = 'none';
+        }, false);
+
+        document.getElementById('setupadvanced').addEventListener('click', function () {
+            SneekMe.advanced(callback);
             menu.style.display = 'none';
         }, false);
 
