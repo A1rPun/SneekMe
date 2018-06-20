@@ -3,16 +3,14 @@ SneekMe.metaGame = function (tiles, colors, cw, callback) {
     var container = document.getElementById('Game'),
         canvas = document.getElementById('picklevel'),
         ctx = canvas.getContext("2d"),
-        level = SneekMe.loadLevel(SneekMe.blank),
+        level,
         tilewidth = 2,
         width = 80 * tilewidth,
         height = 56 * tilewidth;
 
     init();
     function init() {
-        var lvl = SneekMe.loadLevel(SneekMe.store.getItem('level') || SneekMe.blank);
-        if (lvl)
-            level = lvl;
+        level = SneekMe.stringToLevel(SneekMe.store.getItem('level'));
 
         if (SneekMe.players)
             loadPlayers();

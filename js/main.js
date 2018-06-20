@@ -133,15 +133,19 @@
         }
     };
 
-    SneekMe.saveLevel = function (lvl) {
+    SneekMe.levelToString = function (lvl) {
         var level = '';
-        for (var i = 0; i < 4480; i++)
-            level += lvl[i % 56][~~(i / 56)] + '\n';
-        SneekMe.store.set('level', level);
+        for (var i = 0; i < 4480; i++) {
+            var n = lvl[i % 56][~~(i / 56)];
+            if (n === tiles.none) n = -1; // Export tiles.none to -1
+            level += n + '\n';
+        }
+        return level;
     };
 
-    SneekMe.loadLevel = function (lvl) {
-        if (!lvl) return;
+    SneekMe.stringToLevel = function (lvl) {
+        if (!lvl)
+            lvl = SneekMe.blank;
 
         var split = lvl.split('\n');
         if (split.length === 4481)

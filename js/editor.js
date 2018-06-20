@@ -1,5 +1,5 @@
 ﻿SneekMe.editor = function (tiles, cw, callback) {
-    var level = SneekMe.loadLevel(SneekMe.store.getItem('level') || SneekMe.blank);
+    var level = SneekMe.stringToLevel(SneekMe.store.getItem('level'));
     function rand(num) {
         return Math.floor(Math.random() * num);
     }
@@ -40,9 +40,21 @@
         document.getElementById('save').addEventListener('click', saveLevel, false);
 
         //CUSTOM
+        function download(filename, text) {
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
+
+            element.style.display = 'none';
+            document.body.appendChild(element);
+
+            element.click();
+
+            document.body.removeChild(element);
+        }
         document.getElementById('share').addEventListener('click', function () {
-            var minified = JSON.stringify(level);
-            prompt('Share this level!', minified);
+            var lvl = SneekMe.levelToString(level);
+            download('level.sml', lvl);
         }, false);
 
         //EXIT
@@ -71,7 +83,7 @@
         //Tiles
         document.getElementById('none').addEventListener('click', function () {
             currentTile = tiles.none;
-            setActive(this);            
+            setActive(this);
         }, false);
         document.getElementById('solid').addEventListener('click', function () {
             currentTile = tiles.solid;
@@ -174,21 +186,18 @@
         tile.className = 'tile-active';
     }
     function newLevel() {
-        level = SneekMe.loadLevel(SneekMe.blank);
+        level = SneekMe.stringToLevel();
         drawLevel();
     }
     function loadLevel() {
         var lvl = prompt('Enter level here', '');
-
-        lvl = SneekMe.loadLevel(lvl);
-
-        if (lvl) {
-            level = lvl;
-        }
+        if (lvl)
+            level = SneekMe.stringToLevel(lvl);
     }
 
     function saveLevel() {
-        SneekMe.saveLevel(level);
+        var level = SneekMe.levelToString(level);
+        SneekMe.store.set('level', level);
     }
 
     function getMousePos(event) {
@@ -210,7 +219,7 @@
             y: Math.floor(pos.y / cw)
         }
         mouseIsDown = true;
-        if (event.which === 3) { right = true;}
+        if (event.which === 3) { right = true; }
         mouseMove(event);
         event.preventDefault();
     }
@@ -218,11 +227,11 @@
 
         if (mouseStart) {
             var pos = getMousePos(event),
-                    x = Math.floor(pos.x / cw),
-                    y = Math.floor(pos.y / cw),
-                    tile = getCurrentTile();
+                x = Math.floor(pos.x / cw),
+                y = Math.floor(pos.y / cw),
+                tile = getCurrentTile();
 
-            if (currentMode === modes.line) {                
+            if (currentMode === modes.line) {
                 bresenham(mouseStart.x, mouseStart.y, x, y, setTile);
                 drawLevel();
             } else if (currentMode === modes.box) {
@@ -254,7 +263,7 @@
                 level[y][x] = getCurrentTile();
             } else if (currentMode === modes.line) {
                 ctx.strokeStyle = '#00FF00';
-                bresenham(mouseStart.x, mouseStart.y, x, y, function (x, y) {                    
+                bresenham(mouseStart.x, mouseStart.y, x, y, function (x, y) {
                     ctx.strokeRect(x * cw, y * cw, cw, cw);
                 });
             } else if (currentMode === modes.box) {
@@ -268,20 +277,20 @@
                 bresenham(mouseStart.x, y, x, y, drawrect);
             }
         }
-        
+
         ctx.strokeStyle = '#0000FF';
         ctx.strokeRect(x * cw, y * cw, cw, cw);
 
         event.preventDefault();
     }
 
-    function setTile(x, y){
+    function setTile(x, y) {
         if (level[y] !== null && level[y][x] !== null)
             level[y][x] = getCurrentTile();
     }
 
     function drawLevel() {
-        ctx.clearRect(0, 0, width,  height);
+        ctx.clearRect(0, 0, width, height);
 
         var h = level.length,
             w = level[0].length;
@@ -302,14 +311,14 @@
             }
         }
         //Draw grid
-        ctx.strokeStyle = "#CCCCCC";               
-        for (var i = h+1; i--;) {
+        ctx.strokeStyle = "#CCCCCC";
+        for (var i = h + 1; i--;) {
             ctx.beginPath();
             ctx.moveTo(0, cw * i);
             ctx.lineTo(width, cw * i);
             ctx.stroke();
         }
-        for (var j = w+1; j--;) {
+        for (var j = w + 1; j--;) {
             ctx.beginPath();
             ctx.moveTo(cw * j, 0);
             ctx.lineTo(cw * j, height);
