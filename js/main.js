@@ -175,10 +175,7 @@
             level[i % 56].push(split[i]);
         return level;
     };
-    function setSettings() {
-        SneekMe.controls = SneekMe.store.get('controls') || SneekMe.getDefaultControls();
-        SneekMe.players = SneekMe.store.get('players');
-    };
+    
     SneekMe.getDefaultControls = function () {
         return {
             A: {
@@ -210,7 +207,7 @@
                 shoot: 96,
             }
         };
-    };
+    }
 
     var bg = document.getElementById('bg'),
         bgctx = bg.getContext("2d"),
@@ -242,7 +239,8 @@
     });
 
     function init(images) {
-        setSettings();
+        SneekMe.controls = SneekMe.store.get('controls') || SneekMe.getDefaultControls();
+        SneekMe.players = SneekMe.store.get('players');
         SneekMe.keys = [];
         SneekMe.images = images;
         document.addEventListener('keydown', function (e) {
