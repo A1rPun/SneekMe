@@ -145,7 +145,7 @@
 
     SneekMe.stringToLevel = function (lvl) {
         if (!lvl)
-            lvl = SneekMe.blank;
+            lvl = SneekMe.level.blank;
 
         var split = lvl.split('\n');
         if (split.length === 4481)

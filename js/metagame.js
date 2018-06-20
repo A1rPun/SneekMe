@@ -2,23 +2,26 @@
 SneekMe.metaGame = function (tiles, colors, cw, callback) {
     var container = document.getElementById('Game'),
         canvas = document.getElementById('picklevel'),
-        ctx = canvas.getContext("2d"),
-        level,
+        ctx = canvas.getContext('2d'),
         tilewidth = 2,
         width = 80 * tilewidth,
         height = 56 * tilewidth;
 
     init();
     function init() {
-        level = SneekMe.stringToLevel(SneekMe.store.getItem('level'));
-
         if (SneekMe.players)
             loadPlayers();
 
         container.style.display = '';
         canvas.width = width;
         canvas.height = height;
-        drawLevel();
+
+        var lvlname = document.getElementById('levelname');
+        var level = SneekMe.stringToLevel(SneekMe.store.getItem('level'));
+        var levels = Object.keys(SneekMe.level);
+        var currentLevel = 0;
+        lvlname.innerHTML = 'Custom';
+        drawLevel(level);
 
         document.getElementById('cancelgame').addEventListener('click', function () {
             destroy();
@@ -28,6 +31,22 @@ SneekMe.metaGame = function (tiles, colors, cw, callback) {
             destroy();
             savePlayers();
             SneekMe.startGame(getPlayers(), level, tiles, colors, cw, callback);
+        }, false);
+        document.getElementById('previouslevel').addEventListener('click', function () {
+            currentLevel--;
+            if (currentLevel < 0)
+                currentLevel = levels.length - 1;
+            level = SneekMe.stringToLevel(SneekMe.level[levels[currentLevel]]);
+            lvlname.innerHTML = levels[currentLevel];
+            drawLevel(level);
+        }, false);
+        document.getElementById('nextlevel').addEventListener('click', function () {
+            currentLevel++;
+            if (currentLevel >= levels.length)
+                currentLevel = 0;
+            level = SneekMe.stringToLevel(SneekMe.level[levels[currentLevel]]);
+            lvlname.innerHTML = levels[currentLevel];
+            drawLevel(level);
         }, false);
 
         var controlButtons = container.querySelectorAll('.btn-controls');
@@ -44,14 +63,14 @@ SneekMe.metaGame = function (tiles, colors, cw, callback) {
         container.parentNode.replaceChild(elClone, container);
         elClone.style.display = 'none';
     }
-
-    function drawLevel() {
+    
+    function drawLevel(lvl) {
         ctx.fillStyle = 'blue';
         ctx.fillRect(0, 0, width, height);
 
         for (var i = height / tilewidth; i--;) {
             for (var j = width / tilewidth; j--;) {
-                switch (level[i][j]) {
+                switch (lvl[i][j]) {
                     case tiles.breakable:
                         ctx.fillStyle = 'red';
                         ctx.fillRect(j * tilewidth, i * tilewidth, tilewidth, tilewidth);
@@ -64,7 +83,6 @@ SneekMe.metaGame = function (tiles, colors, cw, callback) {
                 }
             }
         }
-        //ctx.
     }
 
     function getPlayers() {
