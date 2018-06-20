@@ -10,7 +10,7 @@ SneekMe.metaGame = function (tiles, colors, cw, callback) {
 
     init();
     function init() {
-        var lvl = SneekMe.loadLevel(SneekMe.store.getItem('level'));
+        var lvl = SneekMe.loadLevel(SneekMe.store.getItem('level') || SneekMe.blank);
         if (lvl)
             level = lvl;
 

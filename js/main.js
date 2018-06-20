@@ -134,45 +134,42 @@
     };
 
     SneekMe.saveLevel = function (lvl) {
-        var level = lvl.reduce(function (acc, cur) {
-            return acc + cur.join(',') + ',';
-        }, '');
-        level = level.slice(0, -1);
+        var level = '';
+        for (var i = 0; i < 4480; i++)
+            level += lvl[i % 56][~~(i / 56)] + '\n';
         SneekMe.store.set('level', level);
     };
 
     SneekMe.loadLevel = function (lvl) {
         if (!lvl) return;
 
-        var split = lvl.split(',');
-        /*
-        TODO: support original snakeme levels
-        if (split.length === 1) {
-            split = lvl.split('\n');
-            if (split.length === 4481)
-                split.pop();
-        }
-        */
-        if (split.length === 4480) {
-            split = split.map(function (v) {
-                var n = +v;
-                // Bug if tiles.none === -1 so this is a "workaround"
-                if (n === -1)
-                    n = tiles.none;
-                // Change to respective tiles.. TODO: implement alternate tiles
-                if (n === tiles.altSolid)
-                    n = tiles.solid;
-                if (n === tiles.altBreakable)
-                    n = tiles.breakable;
-                return n;
-            });
+        var split = lvl.split('\n');
+        if (split.length === 4481)
+            split.pop();
 
-            var level = [];
-            for (var i = 0; i < 56; i++) {
-                level.push(split.splice(0, 80));
-            }
-            return level;
-        }
+        if (split.length !== 4480)
+            return;
+
+        split = split.map(function (v) {
+            var n = +v;
+            // Bug if tiles.none === -1 so this is a "workaround"
+            if (n === -1)
+                n = tiles.none;
+            // Change to respective tiles.. TODO: implement alternate tiles
+            if (n === tiles.altSolid)
+                n = tiles.solid;
+            if (n === tiles.altBreakable)
+                n = tiles.breakable;
+            return n;
+        });
+        //56 x 80
+
+        var level = [];
+        for (var i = 0; i < 56; i++)
+            level[i] = [];
+        for (var i = 0, l = split.length; i < l; i++)
+            level[i % 56].push(split[i]);
+        return level;
     };
     function setSettings() {
         SneekMe.controls = SneekMe.store.get('controls') || SneekMe.getDefaultControls();
