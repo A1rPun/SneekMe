@@ -17,10 +17,11 @@ SneekMe.metaGame = function (tiles, colors, cw, callback) {
         canvas.height = height;
 
         var lvlname = document.getElementById('levelname');
-        var level = SneekMe.stringToLevel(SneekMe.store.getItem('level'));
-        var levels = Object.keys(SneekMe.level);
+        var allLevels = Object.assign({}, SneekMe.level, SneekMe.customLevel);
+        var levels = Object.keys(allLevels);
         var currentLevel = 0;
-        lvlname.innerHTML = 'Custom';
+        var level = SneekMe.stringToLevel(allLevels[levels[currentLevel]]);
+        lvlname.innerHTML = levels[currentLevel];
         drawLevel(level);
 
         document.getElementById('cancelgame').addEventListener('click', function () {
@@ -36,7 +37,7 @@ SneekMe.metaGame = function (tiles, colors, cw, callback) {
             currentLevel--;
             if (currentLevel < 0)
                 currentLevel = levels.length - 1;
-            level = SneekMe.stringToLevel(SneekMe.level[levels[currentLevel]]);
+            level = SneekMe.stringToLevel(allLevels[levels[currentLevel]]);
             lvlname.innerHTML = levels[currentLevel];
             drawLevel(level);
         }, false);
@@ -44,7 +45,7 @@ SneekMe.metaGame = function (tiles, colors, cw, callback) {
             currentLevel++;
             if (currentLevel >= levels.length)
                 currentLevel = 0;
-            level = SneekMe.stringToLevel(SneekMe.level[levels[currentLevel]]);
+            level = SneekMe.stringToLevel(allLevels[levels[currentLevel]]);
             lvlname.innerHTML = levels[currentLevel];
             drawLevel(level);
         }, false);

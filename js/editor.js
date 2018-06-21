@@ -1,13 +1,16 @@
 ﻿SneekMe.editor = function (tiles, cw, callback) {
-    var level = SneekMe.stringToLevel(SneekMe.store.getItem('level'));
+    var level;
+    var levelName = '';
+
     function rand(num) {
         return Math.floor(Math.random() * num);
     }
 
-    var canvas = document.getElementById('Editor'),
+    var container = document.getElementById('Chooselevel'),
+        canvas = document.getElementById('Editor'),
         ctx = canvas.getContext("2d"),
-        height = level.length * cw,
-        width = level[0].length * cw,
+        height = 56 * cw,
+        width = 80 * cw,
         mid = cw / 2,
         mouseStart = null,
         mouseIsDown = false,
@@ -23,11 +26,62 @@
 
     init();
     function init() {
+        var levels = Object.keys(SneekMe.customLevel);
+        var levelselect = container.querySelector('[name="customlevel"]');
+        container.style.display = '';
+
+        if (levels.length) {
+            fillSelect(levelselect, levels);
+            document.getElementById('customlevel').style.display = '';
+        }
+
+        document.getElementById('newlevel').addEventListener('click', function () {
+            level = SneekMe.stringToLevel();
+            container.style.display = 'none';
+            initCanvas();
+        }, false);
+        container.querySelector('[name="file"]').addEventListener('change', function (event) {
+            var file = event.target.files[0];
+            var reader = new FileReader();
+            // Closure to capture the file information.
+            reader.onload = function (e) {
+                level = SneekMe.stringToLevel(e.target.result);
+                levelName = file.name.split('.').slice(0, -1).join();
+                container.style.display = 'none';
+                initCanvas();
+            };
+            reader.readAsText(file, "UTF-8");
+        }, false);
+        document.getElementById('editlevel').addEventListener('click', function () {
+            var lvl = levelselect.options[levelselect.selectedIndex].value;
+            level = SneekMe.stringToLevel(SneekMe.customLevel[lvl]);
+            container.style.display = 'none';
+            initCanvas();
+        }, false);
+        document.getElementById('canceleditor').addEventListener('click', destroy, false);
+
+        SneekMe.keyHandler = function (key) {
+            if (key === 27) {
+                destroy();
+            }
+        };
+    }
+
+    function fillSelect(select, items) {
+        var options = '';
+        for (var i = 0, l = items.length; i < l; i++) {
+            options += '<option>' + items[i] + '</option>';
+        }
+        select.innerHTML = options;
+    }
+
+    function initCanvas() {
         canvas.width = width;
         canvas.height = height;
         canvas.style.display = '';
-        drawLevel();
         document.getElementById('tiles').style.display = '';
+        drawLevel();
+
 
         canvas.addEventListener('mousedown', mouseDown, false);
         canvas.addEventListener('mouseup', mouseUp, false);
@@ -36,31 +90,16 @@
 
         //CRUD
         document.getElementById('new').addEventListener('click', newLevel, false);
-        document.getElementById('load').addEventListener('click', loadLevel, false);
         document.getElementById('save').addEventListener('click', saveLevel, false);
 
-        //CUSTOM
-        function download(filename, text) {
-            var element = document.createElement('a');
-            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-            element.setAttribute('download', filename);
-
-            element.style.display = 'none';
-            document.body.appendChild(element);
-
-            element.click();
-
-            document.body.removeChild(element);
-        }
+        //CUSTOM        
         document.getElementById('share').addEventListener('click', function () {
             var lvl = SneekMe.levelToString(level);
-            download('level.sml', lvl);
+            download((levelName || 'level') + '.sml', lvl);
         }, false);
 
         //EXIT
-        document.getElementById('exit').addEventListener('click', function () {
-            destroy();
-        }, false);
+        document.getElementById('exit').addEventListener('click', destroy, false);
 
         //Modes
         document.getElementById('dot').addEventListener('click', function () {
@@ -93,22 +132,21 @@
             currentTile = tiles.breakable;
             setActive(this);
         }, false);
-
-        SneekMe.keyHandler = function (key) {
-            if (key === 27) {
-                destroy();
-            }
-        };
     }
 
     function destroy() {
         //remove all listeners
-        var el = document.getElementById('tiles'),
-            elClone = el.cloneNode(true);
-        el.parentNode.replaceChild(elClone, el);
+        var conClone = container.cloneNode(true);
+        var el = document.getElementById('tiles');
+        var elClone = el.cloneNode(true);
 
-        canvas.style.display = 'none';
+        el.parentNode.replaceChild(elClone, el);
+        container.parentNode.replaceChild(conClone, container);
+
+        conClone.style.display = 'none';
         elClone.style.display = 'none';
+        container.style.display = 'none';
+        canvas.style.display = 'none';
 
         callback && callback();
     }
@@ -186,18 +224,16 @@
         tile.className = 'tile-active';
     }
     function newLevel() {
+        levelName = '';
         level = SneekMe.stringToLevel();
         drawLevel();
     }
-    function loadLevel() {
-        var lvl = prompt('Enter level here', '');
-        if (lvl)
-            level = SneekMe.stringToLevel(lvl);
-    }
 
     function saveLevel() {
+        var lvlname = prompt('Enter level name', levelName) || 'default';
         var lvl = SneekMe.levelToString(level);
-        SneekMe.store.set('level', lvl);
+        SneekMe.customLevel[lvlname] = lvl;
+        SneekMe.store.set('level', SneekMe.customLevel);
     }
 
     function getMousePos(event) {
@@ -339,5 +375,15 @@
         ctx.stroke();
 
         ctx.lineWidth = 1;
+    }
+
+    function download(filename, text) {
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
     }
 };

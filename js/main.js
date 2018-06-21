@@ -272,6 +272,7 @@
         SneekMe.controls = SneekMe.store.get('controls') || SneekMe.getDefaultControls();
         SneekMe.settings = SneekMe.store.get('settings') || SneekMe.getDefaultSettings();
         SneekMe.players = SneekMe.store.get('players');
+        SneekMe.customLevel = SneekMe.store.get('level') || {};
         SneekMe.keys = [];
         SneekMe.images = images;
         document.addEventListener('keydown', function (e) {

@@ -8,8 +8,9 @@ A HTML5 & Javascript game inspired by SnakeMe.
 
 - Best accuracy & most shots stats
 - End game stats styling + presentation
-- Advanced options
-- Pre-game styling
+- Overall styling
+- After game return to pregame (bubble callback?)
+- Themes in game & editor
 
 ## Known bugs
 

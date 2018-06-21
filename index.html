@@ -19,14 +19,13 @@
             <div class="hudcontainer">
                 <div class="btnrow">
                     <button class="btn-small" id="new">New</button>
-                    <button class="btn-small" id="load">Load</button>
                     <button class="btn-small" id="save">Save</button>
                     <button class="btn-small" id="share">Share</button>
                 </div>
                 <div class="btnrow">
                     <button class="btn-small" id="exit">Exit</button>
-                    <button class="btn-small" id="theme">Theme</button>
-                    <button class="btn-small" id="undo">Undo</button>
+                    <button class="btn-small" id="theme" style="display: none;">Theme</button>
+                    <button class="btn-small" id="undo" style="display: none;">Undo</button>
                 </div>
             </div>
             <div class="hudcontainer">
@@ -423,6 +422,34 @@
             </div>
         </div>
 
+        <div class="container" id="Chooselevel" style="display: none;">
+            <div class="menuwrap">
+                <button class="btn-large" id="newlevel">New level</button>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    Upload a shared ".sml" file here
+                </div>
+                <div class="col-6">
+                    <input type="file" name="file" />
+                </div>
+            </div>
+            <div class="row" id="customlevel" style="display: none;">
+                <div class="col-2">
+                    Edit custom level
+                </div>
+                <div class="col-6">
+                    <select name="customlevel"></select>
+                </div>
+                <div class="col-2">
+                    <button id="editlevel">Edit</button>
+                </div>
+            </div>
+            <div class="menuwrap">
+                <button class="btn-large" id="canceleditor">Cancel</button>
+            </div>
+        </div>
+
         <div class="container" id="Menu">
             <div class="menuwrap">
                 <button class="btn-large" id="setupgame">Game</button>
@@ -437,6 +464,7 @@
     <script type="text/javascript">
         window.SneekMe = window.SneekMe || {};
     </script>
+    <script src="js/polyfill.js"></script>
     <script src="js/astar.js"></script>
     <script src="js/gameState.js"></script>
     <script src="js/player.js"></script>
