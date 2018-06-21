@@ -33,7 +33,7 @@
         mid = cw / 2,
         AUTOPILOTCOUNT = 20,
         FINDPATHCOUNT = 5,
-        MAX_SHOTS = 10,        
+        MAX_SHOTS = 10,
         //Add shots
         ADD_SHOTS = 1,
         //PICKUP_INTERVAL
@@ -143,6 +143,8 @@
             maxLife = { value: 0, index: -1 },
             foodCount = { value: 0, index: -1 },
             shotsHit = { value: 0, index: -1, fired: 0 },
+            shotsFired = { value: 0, index: -1 },
+            shotDistance = { value: 0, index: -1 },
             respawns = { value: Infinity, index: -1 };
 
         for (var i = players.length; i--;) {
@@ -169,6 +171,16 @@
                 shotsHit.fired = player.shotsFired;
             }
 
+            if (player.shotsFired > shotsFired.value) {
+                shotsFired.index = i;
+                shotsFired.value = player.shotsFired;
+            }
+
+            if (player.shotDistance > shotDistance.value) {
+                shotDistance.index = i;
+                shotDistance.value = player.shotDistance;
+            }
+
             if (player.respawns < respawns.value && player.respawns > -1) {
                 respawns.index = i;
                 respawns.value = player.respawns;
@@ -192,6 +204,8 @@
         ~foodCount.index && drawStat('Most foods: ' + foodCount.value + ' ' + players[foodCount.index].name);
         ~shotsHit.index && drawStat('Bullits hit: ' + shotsHit.value + ' of ' + shotsHit.fired +
             ' (' + (shotsHit.value / shotsHit.fired * 100).toFixed(2) + '%) ' + players[shotsHit.index].name);
+        ~shotsFired.index && drawStat('Most shots: ' + shotsFired.value + ' ' + players[shotsFired.index].name);
+        ~shotDistance.index && drawStat('Longest shot: ' + shotDistance.value + ' ' + players[shotDistance.index].name);
         ~respawns.index && drawStat('Least respawns: ' + respawns.value + ' ' + players[respawns.index].name);
     }
 
@@ -391,16 +405,7 @@
             one.direction = 0;
             two.direction = 2;
         }
-        /*
-        var od = calculateDirection(x, y, one.direction),
-            td = calculateDirection(x, y, two.direction);
-
-        one.x = od[0];
-        one.y = od[1];
-        two.x = td[0];
-        two.y = td[1];
-        */
-        player.shotsFired += 2;
+        player.shotsFired++;
         player.shoot = false;
         SneekMe.playSound('shoot');
         drawHud();
@@ -454,7 +459,7 @@
             if (tile === tiles.snake) {
                 bullitCollision(bullit);
             } else if (tile === tiles.breakable || tile === tiles.deadSnake) {
-                players[bullit.owner].shotsHit++;
+                //players[bullit.owner].shotsHit++;
                 level[bullit.y][bullit.x] = tiles.none;
             }
             return;
@@ -474,6 +479,9 @@
                 if (players[bullit.owner].id !== player.id) {
                     players[bullit.owner].shotsHit++;
                     players[bullit.owner].score += settings.ADD_HIT_SCORE;
+
+                    if (bullit.distance > players[bullit.owner].shotDistance)
+                        players[bullit.owner].shotDistance = bullit.distance;
                 }
 
                 //index hit the head or 2nd index

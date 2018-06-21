@@ -6,11 +6,12 @@ A HTML5 & Javascript game inspired by SnakeMe.
 
 ## ToDo
 
-- Best accuracy & most shots stats
 - End game stats styling + presentation
 - Overall styling
 - After game return to pregame (bubble callback?)
 - Themes in game & editor
+- Better control over the controlschemes when selecting player
+- Able to select relative steering when selecting player
 
 ## Known bugs
 

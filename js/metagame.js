@@ -96,7 +96,7 @@ SneekMe.metaGame = function (tiles, colors, cw, callback) {
                 continue;
 
             var player = new SneekMe.player({
-                id: i,
+                id: players.length,
                 color: i,
                 name: settings.querySelector('.txt-name').value,
                 controls: [controls.A, controls.B, controls.C, controls.D][i % 4],

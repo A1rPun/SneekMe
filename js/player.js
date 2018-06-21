@@ -16,6 +16,7 @@
         this.foodCount = 0;
         this.shotsFired = 0;
         this.shotsHit = 0;
+        this.shotDistance = 0;
         this.respawn();
     }
     player.prototype = {
