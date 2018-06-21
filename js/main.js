@@ -247,8 +247,6 @@
 
     makeImages({
         bg: 'img/steelpix.jpg',
-        //bg: 'img/wood.jpg',
-        //bg: 'img/ground.jpg',
         food: 'img/food.png',
         crown: 'img/crown.png',
         weapon: 'img/weapon.png',

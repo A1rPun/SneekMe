@@ -2,7 +2,10 @@ SneekMe
 =======
 
 A HTML5 & Javascript game inspired by SnakeMe.
-![snakeme.gif](/img/snakeme.gif)
+
+Original SnakeMe                 | HTML5 SneekMe
+:-------------------------------:|:-------------------------------:
+![snakeme.gif](/img/snakeme.gif) | ![snakeme.png](/img/snakeme.png)
 
 ## ToDo
 

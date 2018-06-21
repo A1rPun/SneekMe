@@ -203,7 +203,7 @@
         ~maxLife.index && drawStat('Longest life: ' + ~~(maxLife.value / 1000) + 's ' + players[maxLife.index].name);
         ~foodCount.index && drawStat('Most foods: ' + foodCount.value + ' ' + players[foodCount.index].name);
         ~shotsHit.index && drawStat('Bullits hit: ' + shotsHit.value + ' of ' + shotsHit.fired +
-            ' (' + (shotsHit.value / shotsHit.fired * 100).toFixed(2) + '%) ' + players[shotsHit.index].name);
+            ' (' + Math.round(shotsHit.value / shotsHit.fired * 100) + '%) ' + players[shotsHit.index].name);
         ~shotsFired.index && drawStat('Most shots: ' + shotsFired.value + ' ' + players[shotsFired.index].name);
         ~shotDistance.index && drawStat('Longest shot: ' + shotDistance.value + ' ' + players[shotDistance.index].name);
         ~respawns.index && drawStat('Least respawns: ' + respawns.value + ' ' + players[respawns.index].name);
